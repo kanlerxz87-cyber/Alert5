@@ -62,6 +62,12 @@ for (const file of walk(ROOT)) {
         continue;
       }
       checked.push(`${rel} -> ${ref}`);
+      // Pages excludes dot-directories even when the source exists in Git.
+      // Link repository-only files (e.g. workflows) to github.com instead.
+      const publishedPath = path.relative(ROOT, resolved.path);
+      if (publishedPath.split(path.sep).some(part => part.startsWith('.'))) {
+        problems.push(`${rel}: target "${ref}" is not published by GitHub Pages (hidden path)`);
+      }
       if (!existsSync(resolved.path)) problems.push(`${rel}: missing local target "${ref}"`);
     }
     // The three app pages (scoreboard, game, replay feed) must load their scripts.
