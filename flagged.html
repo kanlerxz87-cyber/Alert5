@@ -1144,7 +1144,6 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
         </tr>
       </tbody>
     </table>
-
     <h2 id="alert5-independent-check">17. Independent line-by-line check (session <code>arena/ec8b9e36</code>, 2026-11-25)</h2>
     <p style="color:var(--muted);font-size:13px">
       A fourth session independently re-checked the three reference feed rows and the date-driven
@@ -1182,6 +1181,127 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
       </tbody>
     </table>
 
+    <h2 id="copy-import-audit">18. Copy-import audit (session <code>6a131ebb</code>, 2026-11-25)</h2>
+    <p>
+      Independent second pass over the copy that is now published. The import itself was done by session
+      <code>7693d136</code> (PR #1); this section records an <em>independent</em> check of the same pinned revision,
+      the official sources re-read for it, and the additions this session contributed
+      (<code>tests/preview-day-render-test.mjs</code> + its fixture). Sections 1–17 and the
+      <a href="#alert5-verification">Alert5 verification</a> block are unchanged.
+    </p>
+
+    <table class="verify">
+      <thead>
+        <tr><th>#</th><th>Item</th><th>Source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C-0</td>
+          <td class="wrap">The published site serves the pinned revision <code>5c02527d3c7a56ea66c698cfabff80a407b6dfd3</code>; an independent clone matches this repository's application files. Live confirmation: the Alert5 replay feed for 2026-08-26 shows the same games, challenge counters and outcomes as the reference site.</td>
+          <td class="wrap"><a href="https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26" target="_blank" rel="noopener">Alert5 replay feed</a> · <a href="https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26" target="_blank" rel="noopener">reference replay feed</a> · <a href="https://api.github.com/repos/snapquast73-boop/LIVPBP/pages/builds?per_page=1" target="_blank" rel="noopener">upstream Pages build for 5c02527</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>C-S1</td>
+          <td class="wrap">Slate and manager-challenge counters rendered on the scoreboard and feed (<code>dates[].games[]</code>, <code>review.away/home.{used,remaining}</code>)</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2026-08-26&amp;hydrate=review" target="_blank" rel="noopener">/schedule 2026-08-26 hydrate=review</a></td>
+          <td class="status-ok">Verified — 15 games; game <code>823180</code> CIN 10 – SF 9 returns <code>home.used=1, remaining=0</code>, which is the “SF: 0 manager challenges left now (1 used)” the feed prints</td>
+        </tr>
+        <tr>
+          <td>C-S2</td>
+          <td class="wrap">Review type labels and reasons (<code>M*</code> manager challenge, <code>N*</code> umpire review, <code>MJ</code>/<code>NJ</code> “Pitch Result”, <code>IH</code> “Instant Replay”)</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/gameStatus" target="_blank" rel="noopener">/api/v1/gameStatus</a></td>
+          <td class="status-ok">Verified verbatim: <code>MF</code> “Manager challenge: Close play at 1st”, <code>MA</code> “Tag play”, <code>NH</code> “Umpire review: Home run”, <code>MJ</code> “Player challenge: Pitch Result”, <code>NJ</code> “Umpire Challenge: Pitch Result”, <code>IH</code> detailedState “Instant Replay” / reason “Review”</td>
+        </tr>
+        <tr>
+          <td>C-S3</td>
+          <td class="wrap">ABS counter line (<code>usedSuccessful / usedFailed / remaining</code>)</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1.1/game/823180/feed/live?fields=gameData,absChallenges,hasChallenges,away,home,usedSuccessful,usedFailed,remaining,review,used" target="_blank" rel="noopener">/v1.1/game/823180/feed/live (leaf projection)</a></td>
+          <td class="status-ok">Verified — CIN 4 successful / 0 failed / 2 remaining; SF 2 / 1 / 1</td>
+        </tr>
+        <tr>
+          <td>C-S4</td>
+          <td class="wrap">“Official-scorer pending ruling” rows</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/eventTypes" target="_blank" rel="noopener">/api/v1/eventTypes</a></td>
+          <td class="status-ok">Verified — <code>os_ruling_pending_primary</code> / <code>os_ruling_pending_prior</code>, “Official Scorer Ruling Pending”</td>
+        </tr>
+        <tr>
+          <td>C-S5</td>
+          <td class="wrap">Team abbreviations in <code>UI.TEAM_ABBR</code></td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/teams?sportId=1&amp;fields=teams,id,name,abbreviation,teamCode,fileCode,teamName" target="_blank" rel="noopener">/api/v1/teams?sportId=1</a></td>
+          <td class="status-ok">Verified — all 30 match, including <code>109</code> → <code>AZ</code> and <code>118</code> → <code>KC</code></td>
+        </tr>
+        <tr>
+          <td>C-S6</td>
+          <td class="wrap">Review event fields read from play-by-play (<code>reviewType</code>, <code>isOverturned</code>, <code>challengeTeamId</code>)</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/game/823096/playByPlay" target="_blank" rel="noopener">/game/823096/playByPlay</a></td>
+          <td class="status-ok">Verified — <code>reviewType:"MJ"</code>, <code>isOverturned:true</code>, <code>challengeTeamId:143</code> at atBatIndex 0</td>
+        </tr>
+        <tr>
+          <td>C-S7</td>
+          <td class="wrap"><strong>Upcoming game days.</strong> The next date MLB publishes games for is 2027-02-19; the six-game slice of that official response is now rendered through the real pages by <code>tests/preview-day-render-test.mjs</code> (24 checks: six cards, venue and “Scheduled” from the payload, no invented probable pitcher, game page clears its loading overlay with an empty <code>allPlays</code>, replay feed shows its empty state without inventing a review row).</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;startDate=2026-11-25&amp;endDate=2027-06-30" target="_blank" rel="noopener">/schedule 2026-11-25 → 2027-06-30</a> · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-02-19&amp;hydrate=probablePitcher,linescore,decisions,review" target="_blank" rel="noopener">2027-02-19 hydrated</a></td>
+          <td class="status-ok">Verified — no games 2026-11-25 … 2027-02-18; first slate 2027-02-19 (16 games, all <code>Preview</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:15px;margin:18px 0 8px">Flagged items from this pass (none block publication)</h3>
+    <table class="verify">
+      <thead>
+        <tr><th>#</th><th>Item</th><th>What could not be confirmed</th><th>Source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C-1</td>
+          <td class="wrap">Provenance ceiling: the reference site is itself a <strong>reconstruction</strong> — its README states the original upload contained no <code>assets/</code> and that the upstream <code>buffedlizard55-lab/MLB-Live-PBP</code> is 404, so the nine asset files were re-implemented from the pages' DOM contract.</td>
+          <td class="wrap">This repository reproduces the <em>reference</em> exactly, which is what was asked. “Identical to the original author's site” cannot be claimed by anyone.</td>
+          <td class="wrap"><a href="https://api.github.com/repos/buffedlizard55-lab/MLB-Live-PBP" target="_blank" rel="noopener">upstream repo → 404</a></td>
+          <td class="status-unverified">Flagged — provenance</td>
+        </tr>
+        <tr>
+          <td>C-2</td>
+          <td class="wrap">Hit-forecast percentages are a <strong>model</strong>, not official data (inputs official, arithmetic not).</td>
+          <td class="wrap">No official MLB source publishes a per-PA hit probability, so the numbers cannot be “verified” — only their inputs can.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/people/660271/stats?stats=expectedStatistics,season,statSplits,gameLog&amp;group=hitting&amp;sitCodes=vl,vr&amp;season=2026" target="_blank" rel="noopener">/people/660271/stats</a> (inputs only)</td>
+          <td class="status-unverified">Unverified by design</td>
+        </tr>
+        <tr>
+          <td>C-3</td>
+          <td class="wrap">The Arena sandbox cannot open TLS to <code>statsapi.mlb.com</code> from Node/curl (<code>SSL_ERROR_SYSCALL</code>), so <code>jsdom-render-test --live</code> was not run there; live payloads above were read through the HTTP page-fetch channel. The live network check for this repository therefore runs in GitHub Actions (<code>npm run test:official</code>).</td>
+          <td class="wrap">No live run from the sandbox. The deployed page calls the API from your browser, which is unaffected — the first live game day remains the true end-to-end proof.</td>
+          <td class="wrap"><a href="https://github.com/kanlerxz87-cyber/Alert5/actions/workflows/site-check.yml" target="_blank" rel="noopener">Site checks workflow</a></td>
+          <td class="status-flag">Flagged — environment limit</td>
+        </tr>
+        <tr>
+          <td>C-4</td>
+          <td class="wrap">Image hosts (<code>www.mlbstatic.com</code> logos, <code>img.mlbstatic.com</code> headshots) are unreachable from the sandbox too, so those URLs stay unconfirmed. A wrong pattern only costs an initials-badge fallback (<code>&lt;img onerror&gt;</code>), never a broken layout.</td>
+          <td class="wrap">Logo/headshot URLs unconfirmed here (unchanged from U-1/U-8).</td>
+          <td class="wrap"><a href="https://www.mlbstatic.com/team-logos/team-cap-on-dark/136.svg" target="_blank" rel="noopener">team 136 logo</a></td>
+          <td class="status-unverified">Unverified — host unreachable here</td>
+        </tr>
+        <tr>
+          <td>C-5</td>
+          <td class="wrap">Request-guard regression (reference audit RR-01: a slow schedule response for an older date must not be written into the newly selected date) is inherited guarded but has no deliberate delayed-response test in this repository.</td>
+          <td class="wrap">Guarded upstream, but I did not prove it here — treat as unproven rather than proven fixed.</td>
+          <td class="wrap"><a href="https://github.com/snapquast73-boop/LIVPBP/blob/main/audit/reference-replay-comparison.md" target="_blank" rel="noopener">RR-01</a></td>
+          <td class="status-unverified">Unverified</td>
+        </tr>
+        <tr>
+          <td>C-6</td>
+          <td class="wrap">Offseason: the scoreboard correctly shows “No games scheduled … Most recent date with games … Show it” and the feed is empty between 2026-11-25 and 2027-02-18.</td>
+          <td class="wrap">This is the official schedule being rendered faithfully, not a fault. Live review alerts first become observable on the 2027-02-19 slate.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-02-19" target="_blank" rel="noopener">2027-02-19 slate</a></td>
+          <td class="status-ok">Expected behaviour</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:13px">
+      Checks run on this branch (2026-11-25, on top of <code>main</code>): <code>node tests/run-all.mjs</code> → syntax OK ·
+      local refs OK · 8 bindings OK · 47/47 jsdom · <strong>24/24 upcoming-day</strong> ·
+      <code>npm test</code> → 64 passed · <code>node tools/restoration-check.mjs</code> → ALL CHECKS PASSED ·
+      <code>node tests/props-provenance-test.mjs</code> → 5 passed.
+    </p>
   </main>
 
   <footer class="site-footer">

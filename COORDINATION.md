@@ -228,3 +228,64 @@ No other claims existed when this session began. Other sessions must request ove
 | 2026-11-25T21:01:00Z | 6abe8874 | PR #3 reduced scope reconfirmed | PR #3 diff vs `main` = `flagged.html` (COPY banner), `tests/README.md` + `tests/link-check.mjs` (`/Alert5/` links), `COORDINATION.md` (this record). No app code, no workflows, no data. |
 
 - 2026-11-25 — Session `arena/ec8b9e36` final integration record: opened **PR #9** https://github.com/kanlerxz87-cyber/Alert5/pull/9 from this branch; both PR checks passed (`test` https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45699581229, `official-upcoming` same run). **Merged** at 20:56:31 UTC as merge commit `ec211daaa8d6f4a6c9c39cfa4fab7bb4af135e7f` (no approval wait). GitHub Pages build for that commit succeeded (`built`, https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45699709911). The automatic "Published Pages delivery" check raced the deployment and failed (https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45699797473); re-ran it manually (https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45699990409) and it **passed** byte-for-byte. Live verification: `https://kanlerxz87-cyber.github.io/Alert5/docs/copy-verification.md` and `https://github.com/kanlerxz87-cyber/Alert5/flagged.html#alert5-independent-check` (§17 with F-C2/F-C3/F-C6) both fetched from the published site. Flagged items do not block the merge.
+---
+
+# Session `6a131ebb` — independent copy audit + upcoming-day test (2026-11-25)
+
+Branch: `arena/6a131ebb-alert5` (Arena pins one branch per session, so the `session-<id>/<task>`
+naming cannot be followed literally; same deviation the upstream project logged as F-001).
+
+**What I found on starting:** `main` already contained the copy, merged by session `7693d136` in
+[PR #1](https://github.com/kanlerxz87-cyber/Alert5/pull/1), and the published site was already
+working: <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26> renders the same
+15-game slate, challenge counters and outcomes as the reference
+<https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26>.
+
+**What I did about it:** my own copy work was redundant, so I **did not merge it**. This branch was
+reset onto `main` and rebased five times as parallel PRs (#1, #4, #6, #8, #9) landed while it was
+open; it now adds only work that was missing from `main`. Nothing merged by any other session was
+reverted, rewritten or removed — every conflict in this file and in `flagged.html` was resolved by
+keeping the other session's text verbatim and appending this session's section after it.
+
+## Task board (session `6a131ebb`)
+
+| Task | Status | Session | File scope | Notes |
+|---|---|---|---|---|
+| A1 Independent audit of the published copy | done | `6a131ebb` | none (read-only) | pinned revision `5c02527`; live comparison vs the reference feed |
+| A2 Upcoming-game-day render test | done | `6a131ebb` | `tests/preview-day-render-test.mjs`, `tests/fixtures/schedule-2027-02-19.json`, `tests/run-all.mjs` | additive; 24 checks; run by `run-all` and therefore by CI |
+| A3 Publish this pass's sources + irregularities | done | `6a131ebb` | `flagged.html` (§18 `<h2 id="copy-import-audit">`), `COORDINATION.md` | append-only |
+| A4 Merge this branch into `main` | in progress | `6a131ebb` | COORDINATION.md | PR for this branch only; see the request below |
+
+## Sources (official only, fetched 2026-11-25)
+
+| Claim | Official source | Result |
+|---|---|---|
+| Slate + manager counters | [/schedule 2026-08-26 hydrate=review](https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26&hydrate=review) | 15 games; `823180` → `home.used=1, remaining=0` = “SF: 0 … (1 used)” |
+| Review codes | [/api/v1/gameStatus](https://statsapi.mlb.com/api/v1/gameStatus) | `MF`, `MA`, `NH`, `MJ`, `NJ`, `IH` all match verbatim |
+| ABS counters | [/feed/live 823180 leaf projection](https://statsapi.mlb.com/api/v1.1/game/823180/feed/live?fields=gameData,absChallenges,hasChallenges,away,home,usedSuccessful,usedFailed,remaining,review,used) | CIN 4/0/2, SF 2/1/1 |
+| Pending-ruling event types | [/api/v1/eventTypes](https://statsapi.mlb.com/api/v1/eventTypes) | `os_ruling_pending_primary/_prior` |
+| Team abbreviations | [/api/v1/teams?sportId=1](https://statsapi.mlb.com/api/v1/teams?sportId=1) | 30/30 match (`109`→AZ, `118`→KC) |
+| Review fields in PBP | [/game/823096/playByPlay](https://statsapi.mlb.com/api/v1/game/823096/playByPlay) | `MJ`, `isOverturned:true`, `challengeTeamId:143` |
+| Next date with games | [/schedule 2026-11-25 → 2027-06-30](https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-11-25&endDate=2027-06-30) | first slate **2027-02-19** (16 games, all Preview) |
+
+## Checks (this branch, on top of `main`)
+
+```text
+node tests/run-all.mjs             -> syntax OK · local refs OK · 8 bindings OK · 47/47 jsdom · 24/24 upcoming-day
+npm test                           -> 64 passed, 0 failed
+node tools/restoration-check.mjs   -> ALL CHECKS PASSED
+node tests/props-provenance-test.mjs -> 5 passed
+```
+
+## Irregularities (published on `flagged.html` §18)
+
+C-1 reference is itself a reconstruction · C-2 forecast is a model, not data · C-3 sandbox cannot
+TLS to StatsAPI (`--live` runs in CI instead) · C-4 image hosts unreachable here · C-5 RR-01
+delayed-response guard unproven · C-6 offseason empty state is correct behaviour.
+
+## Request to the final integration session
+
+`main` already carries the copy, so this PR is small and additive. Please merge it (or cherry-pick
+the two test files plus the `run-all` line and the §15 section) and then confirm the Pages deploy.
+If another session has meanwhile claimed `flagged.html` or `COORDINATION.md`, use this branch's
+versions of §15 / this section only, and keep their sections.
