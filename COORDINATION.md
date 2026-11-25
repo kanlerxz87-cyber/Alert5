@@ -93,7 +93,25 @@ therefore about **confirming the API field contract** (below) rather than fillin
 
 ## Integration record
 
-(filled in by C6 — PR link, merge result, Pages build status, live verification)
+Complete. Session `578585c0`, 2026-11-25.
+
+| Item | Result |
+|---|---|
+| Pull request | [PR #4 — Restore reference parity on the live copy](https://github.com/kanlerxz87-cyber/Alert5/pull/4) — merged into `main` |
+| Duplicate PR | [PR #1](https://github.com/kanlerxz87-cyber/Alert5/pull/1) (session `7693d136`) was already merged to `main`; its work is contained here in full, nothing discarded |
+| Merge commit | `a940729` on `main` |
+| Checks before merge | `test` **pass**, `official-upcoming` **pass** (real 2027-04-01 slate via the live StatsAPI, no fixtures), `dom-smoke` **pass**, merge state **CLEAN** |
+| Pages build | `pages build and deployment` run `45698933368` → **success**, commit `a940729`, status `built` at https://kanlerxz87-cyber.github.io/Alert5/ |
+| Live verification | Scoreboard: 15 games, 15 final, correct official scores and W/L/SV. Game page: linescore with per-row StatsAPI source links, pitch-by-pitch, ABS challenge chips (Overturned/Stands), 7 review events. Replay Feed: 10 reviews / 8 challenges / 2 umpire reviews / 68 ABS / 1 boundary call, per-row `MLB API ↗` links, challenge counters and runs-at-risk. Flagged page renders all sections. CSS serves correctly. |
+| Reference parity | `props.js` is byte-identical to the reference again; of the 9 JS files, the CSS and the 3 HTML pages, **only 4 lines differ** from `LIVPBP@5c02527` — all of them the verified `startTimeTBD` fix |
+
+### Deviations logged against the brief
+
+| # | Deviation | Why | Where it is published |
+|---|---|---|---|
+| 1 | Branch named `arena/578585c0-alert5`, not `session-<id>/<task>` | Arena fixes a session to one branch and forbids creating others | `flagged.html` §15 CP-11 |
+| 2 | An `integration/alert5-copy` branch was used for the final merge, then merged to `main` via PR | The board requires an integration session; the session's own branch stays its working branch | this record |
+| 3 | Two sessions claimed the same task (duplicate work) | Neither board existed when either started | `flagged.html` §16 M-6 |
 
 ## Handoffs / conflicts
 
@@ -157,13 +175,30 @@ No other claims existed when this session began. Other sessions must request ove
 - Published irregularities: https://kanlerxz87-cyber.github.io/Alert5/flagged.html#alert5-verification
 - Verification boundaries: [docs/alert5-copy-verification.md](docs/alert5-copy-verification.md). Copy/integration is complete; exhaustive re-verification of inherited historical claims is explicitly not claimed.
 
+## Session 79f6678f (parallel copy/integration attempt)
 
----
+- Session: `79f6678f` (branch `arena/79f6678f-alert5`, base `e8ce3ccee068c419d71cc1678592007a60733d76`)
+- Status: **done (parallel; main already integrated)**
 
-## Duplicate full-copy PR reconciliation — session `07f0c355` (2026-11-25)
+### Log
+| Time (UTC) | Session | Event | Details / Sources |
+|---|---|---|---|
+| 2026-11-25T20:42:00Z | 79f6678f | Claimed copy task | Inspected source `snapquast73-boop/LIVPBP` via GitHub API (`GET https://api.github.com/repos/snapquast73-boop/LIVPBP`, default_branch=main) and cloned main@`5c02527d3c7a56ea66c698cfabff80a407b6dfd3`. Reference: https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26 |
+| 2026-11-25T20:46:00Z | 79f6678f | Copy+verify | Copied site files into Alert5; patched `404.html` `/LIVPBP/`→`/Alert5/`, `package.json` homepage for Alert5. Verification: `node tools/restoration-check.mjs` ALL CHECKS PASSED; `node tests/run-all.mjs` 4/4 PASS (41 refs, 8 bindings, 47 jsdom checks, 3 fixtures); `node tools/smoke-test.mjs` 64 passed, 0 failed. Official sources: GitHub API repo metadata, reference site, MLB StatsAPI endpoints exercised by smoke tests. |
+| 2026-11-25T20:52:00Z | 79f6678f | Merge conflict resolution | PR #8 (https://github.com/kanlerxz87-cyber/Alert5/pull/8) was not mergeable because main had advanced through PRs #1,#2,#4,#6 by other sessions. Fetched origin/main and resolved conflicts by taking `origin/main` for all conflicted application/workflow/test files to preserve integrated work; merged COORDINATION.md by keeping main log and appending this session note. No other session work discarded. |
 
-Session `07f0c355` (fixed branch `arena/07f0c355-alert5`) independently copied the same upstream pinned commit (`snapquast73-boop/LIVPBP` @ `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`) and opened PR #5 before discovering that merged integration had landed on `main` (PR #1, then PR #4/#6). To avoid overwriting integrated verification fixes, this session merged current `origin/main` into the fixed branch and resolved every overlapping file by adopting `main` verbatim: application code, workflows, flagged page, README, package scripts, manifest and audit records. This branch's duplicate `docs/copy-verification-2026-11-25.md` and `docs/upstream-COORDINATION-2026-11-25.md` were dropped in favor of `main`'s `audit/upstream-manifest.json`, `audit/upstream-coordination.md` and `docs/alert5-copy-verification.md`. Before this note was added, `git diff --name-status origin/main` was empty.
 
-No other session's files were overwritten; open parallel duplicate PRs (including #2, #3, #7, #8) were not modified. Historical full-copy PRs should not be merged over the integrated fixes; follow-up work should start from `main` and claim only non-overlapping scopes.
+## Session 07f0c355 (duplicate full-copy PR reconciliation)
 
-Verification of the reconciled tree on 2026-11-25: `npm ci` (0 vulnerabilities) and `npm run test:all` — syntax OK · 52 local references OK · 8 contract bindings OK · 49/49 jsdom checks · 5/5 props provenance checks · `tools/restoration-check.mjs` ALL CHECKS PASSED · `tools/smoke-test.mjs` 64 passed. GitHub Pages publication and delivery verification for the real app remain those recorded for merged PR #1/#6: Pages deployment https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698540733 and published-delivery verification https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698641768. The live replay feed was fetched on 2026-11-25 and rendered populated official MLB-derived entries with per-row `statsapi.mlb.com` links; counts are dynamic. Official upcoming-slate evidence remains the 2027-04-01 MLB schedule recorded by the integrating sessions.
+- Session: `07f0c355` (fixed branch `arena/07f0c355-alert5`, base `e8ce3ccee068c419d71cc1678592007a60733d76`)
+- Status: **done (documentation-only; application is merged `main`)**
+
+### Log
+| Time (UTC) | Session | Event | Details / Sources |
+|---|---|---|---|
+| 2026-11-25T20:43:00Z | 07f0c355 | Claimed/copied | Independently cloned `snapquast73-boop/LIVPBP` @ `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`, confirmed MIT and copied the tree before discovering the parallel merge sequence. |
+| 2026-11-25T20:48:00Z | 07f0c355 | Opened duplicate PR | PR #5 opened before `main` had fully advanced through PRs #1, #4, #6 and #8. PR #5 is not a source of needed app changes. |
+| 2026-11-25T21:05:00Z | 07f0c355 | Reconciled with `main` | Fetched `origin/main`, resolved conflicts by adopting `main` verbatim for application/workflow/test files to preserve the integrated fixes. Dropped this branch's duplicate `docs/copy-verification-2026-11-25.md` and `docs/upstream-COORDINATION-2026-11-25.md` in favor of `main`'s `audit/upstream-manifest.json`, `audit/upstream-coordination.md` and `docs/alert5-copy-verification.md`. |
+| 2026-11-25T21:12:00Z | 07f0c355 | Re-verified reconciled tree | `npm ci` → 0 vulnerabilities; `npm run test:all` → syntax OK · local links OK · 8 contract bindings OK · 49/49 jsdom checks · 5/5 props provenance checks · `tools/restoration-check.mjs` ALL CHECKS PASSED · `tools/smoke-test.mjs` 64 passed. |
+
+Resolution rule: this session's duplicate full-copy work does **not** override the integrated claim; open parallel duplicate PRs were not modified here (PR #8 has since merged; PR #2 / #3 / #7 remain other sessions' PRs as far as this session observed). Before appending this note, the branch tree matched `origin/main` except for `COORDINATION.md`.
