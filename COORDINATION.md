@@ -29,7 +29,7 @@ different repository's sessions): <https://github.com/snapquast73-boop/LIVPBP/bl
 | T-4 | Spot-verify official MLB StatsAPI endpoints (2026-11-25) — see Verification below | done | `arena-6abe8874` | read-only |
 | T-5 | Run `node tools/restoration-check.mjs`, `node tests/run-all.mjs`, `npm test` | done | `arena-6abe8874` | `node_modules/` (ignored), test output only |
 | T-6 | Local server smoke test + parity check against the reference site for `reviews.html?date=2026-08-26` | done | `arena-6abe8874` | `server.mjs` (read-only), `data/` (ignored) |
-| T-7 | Commit, push, open pull request from `arena/6abe8874-alert5` to `main`, merge it | done (see PR record) | `arena-6abe8874` | git/PR |
+| T-7 | Commit, push, open pull request from `arena/6abe8874-alert5` to `main`, merge it | in progress — PR #3 open | `arena-6abe8874` | git/PR |
 | T-8 | Enable GitHub Pages (legacy, `main` `/`) and confirm the deploy succeeds | done (see Deploy record) | `arena-6abe8874` | repo settings |
 | T-9 | Record PR link + merge result + deploy confirmation in this file (follow-up PR) | done (see PR record) | `arena-6abe8874` | `COORDINATION.md` |
 
@@ -161,7 +161,7 @@ verbatim from official StatsAPI responses).
 | Step | Result |
 |------|--------|
 | Branch | `arena/6abe8874-alert5` (from `e8ce3cc`) |
-| Pull request | _(recorded in PR record PR-1 below)_ |
-| Merge commit | _(recorded in PR record PR-2 below)_ |
-| GitHub Pages | _(recorded in PR record PR-2 below)_ |
-| Live site | _(recorded in PR record PR-2 below)_ |
+| Pull request | **https://github.com/kanlerxz87-cyber/Alert5/pull/3** — “Copy LIVPBP (working MLB Live PBP site) into Alert5 for upcoming game days” |
+| Merge commit | _(filled after merge — see PR-2 entry below)_ |
+| GitHub Pages | _(filled after merge — see PR-2 entry below)_ |
+| Live site | _(filled after merge — see PR-2 entry below)_ |
