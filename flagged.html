@@ -1076,7 +1076,7 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
         <tr>
           <td>CP-11</td>
           <td class="wrap"><strong>Deviation from the brief — branch naming.</strong> The brief asks each session to work on <code>session-&lt;id&gt;/&lt;task&gt;</code>; Arena fixes a session to one branch, so the work is on <code>arena/578585c0-alert5</code>. Logged here and in <code>COORDINATION.md</code> (same deviation the upstream sessions logged as F-001).</td>
-          <td class="wrap"><a href="COORDINATION.md">COORDINATION.md</a> — "Branch / worktree note"</td>
+          <td class="wrap"><a href="COORDINATION.md">COORDINATION.md</a> — "Branch / worktree note" · <a href="https://github.com/kanlerxz87-cyber/Alert5/blob/main/COORDINATION.md" target="_blank" rel="noopener">GitHub COORDINATION.md</a></td>
           <td class="status-flag">Flagged — process deviation</td>
         </tr>
         <tr>
@@ -1302,6 +1302,54 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
       <code>npm test</code> → 64 passed · <code>node tools/restoration-check.mjs</code> → ALL CHECKS PASSED ·
       <code>node tests/props-provenance-test.mjs</code> → 5 passed.
     </p>
+
+    <h2 id="alert5-upcoming-smoke">19. Opening Day 2027 pregame smoke regression &amp; 100% official row-link audit (session <code>d78ea508</code>, 2026-11-25)</h2>
+    <p style="color:var(--muted);font-size:13px">
+      Every row below was verified directly on <strong>2026-11-25</strong> against official
+      <code>statsapi.mlb.com</code> / <code>mlb.com</code> responses and locked into deterministic smoke
+      regression §[14] in <a href="tools/smoke-test.mjs">tools/smoke-test.mjs</a>. Where an official
+      source does not yet publish a value, the confirmed-value cell is left blank and marked
+      <span class="status-unverified">unverified</span>.
+    </p>
+    <table class="verify">
+      <thead>
+        <tr><th>#</th><th>Claim / item checked</th><th>Confirmed official value</th><th>Verification / why flagged</th><th>Official source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>D7-1</td>
+          <td class="wrap">2027 MLB Spring Training start &amp; Opening Day schedule + pregame <code>feed/live</code> payload shape</td>
+          <td class="wrap">Spring Training begins <code>2027-02-19</code> (<code>17</code> games); Opening Day is <code>2027-03-25</code> (<code>14</code> games, e.g. <code>853719</code> CWS @ DET at Comerica Park, <code>2027-03-25T17:10:00Z</code>, <code>abstractGameState: "Preview"</code>, <code>statusCode: "S"</code>, <code>innings: []</code>, <code>batters: []</code>)</td>
+          <td class="wrap">Verified directly against live StatsAPI endpoints and locked into <code>tools/smoke-test.mjs</code> §[14] (3 assertions covering scoreboard <code>Scheduled</code> + <code>startTimeTBD</code> cards, Replay Feed pregame skip + empty-state notice, and <code>game.html</code> Pregame card with <code>–</code> scores).</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;startDate=2026-11-25&amp;endDate=2027-03-26&amp;fields=dates,date,totalGames" target="_blank" rel="noopener">schedule 2026-11-25..2027-03-26</a> · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-03-25&amp;hydrate=probablePitcher,linescore,decisions,review" target="_blank" rel="noopener">schedule 2027-03-25</a> · <a href="https://statsapi.mlb.com/api/v1.1/game/853719/feed/live" target="_blank" rel="noopener">game/853719/feed/live</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>D7-2</td>
+          <td class="wrap">Complete 30-club registry (<code>UI.TEAM_ABBR</code>), <code>/api/v1/gameStatus</code> review codes, <code>/api/v1/eventTypes</code> pending-ruling codes, and MLB Official Scoring Changes policy</td>
+          <td class="wrap">30 clubs (incl. <code>ATH</code> 133, <code>AZ</code> 109, <code>CWS</code> 145); <code>MA…MX</code>, <code>NA…NX</code>, <code>IH</code>, <code>MJ</code>/<code>NJ</code>; <code>os_ruling_pending_primary</code> / <code>_prior</code></td>
+          <td class="wrap">Re-fetched on 2026-11-25 directly from official endpoints; every code and club abbreviation in <code>assets/js/ui.js</code> and <code>assets/js/reviews.js</code> matches verbatim. Official registry quirk: status <code>T9</code> (<code>Scheduled: COVID-19</code>) publishes <code>abstractGameState: "Preview"</code> alongside <code>abstractGameCode: "L"</code>; <code>UI.gameState</code> keys on <code>abstractGameState</code> first so <code>T9</code> stays Preview rather than misclassifying as Live.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/teams?sportId=1&amp;fields=teams,id,name,abbreviation" target="_blank" rel="noopener">teams?sportId=1</a> · <a href="https://statsapi.mlb.com/api/v1/gameStatus" target="_blank" rel="noopener">gameStatus</a> · <a href="https://statsapi.mlb.com/api/v1/eventTypes" target="_blank" rel="noopener">eventTypes</a> · <a href="https://www.mlb.com/official-information/scoring-changes" target="_blank" rel="noopener">mlb.com/official-information/scoring-changes</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>D7-3</td>
+          <td class="wrap">Checkpoint git tag <code>v1.0.0-stable-checkpoint</code> cited in inherited <code>README.md</code></td>
+          <td></td>
+          <td class="wrap"><strong>Flagged:</strong> that git tag existed on upstream <code>snapquast73-boop/LIVPBP</code> (<code>5a06fef</code>), not on <code>kanlerxz87-cyber/Alert5</code>; documented here rather than fabricating a tag or altering inherited README history.</td>
+          <td class="wrap"><a href="https://api.github.com/repos/kanlerxz87-cyber/Alert5/tags" target="_blank" rel="noopener">api.github.com/repos/kanlerxz87-cyber/Alert5/tags</a> · <a href="https://github.com/snapquast73-boop/LIVPBP/releases/tag/v1.0.0-stable-checkpoint" target="_blank" rel="noopener">upstream tag</a></td>
+          <td class="status-flag">Flagged</td>
+        </tr>
+        <tr>
+          <td>D7-4</td>
+          <td class="wrap">2027 per-team <code>absChallenges</code> counters prior to first pitch</td>
+          <td></td>
+          <td class="wrap"><strong>Unverified until 2027 live feeds:</strong> 2027 pregame <code>feed/live</code> (e.g. <code>853719</code>) omits <code>gameData.absChallenges</code> prior to first pitch; client leaves absent ABS counters blank rather than zero-filling or assuming 2026 allocations.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1.1/game/853719/feed/live" target="_blank" rel="noopener">game/853719/feed/live</a></td>
+          <td class="status-unverified">Unverified</td>
+        </tr>
+      </tbody>
+    </table>
   </main>
 
   <footer class="site-footer">

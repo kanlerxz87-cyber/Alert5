@@ -46,9 +46,10 @@ infer or fill in a value.** Anything that cannot be confirmed is left blank and 
 | C3 | Verify the official data sources the site depends on, line by line | done | `578585c0` | `docs/`, `flagged.html` | See verification log below |
 | C4 | Confirm the test suites pass (smoke, jsdom render, link check, contract, provenance) | done | `578585c0` | `tools/`, `tests/` | See verification log |
 | C5 | Confirm the site builds and serves with no broken links (local server + static link check) | done | `578585c0` | repo root | See verification log |
-| C6 | Integration: PR → `main`, merge, confirm GitHub Pages deploy, record result here | in progress | `578585c0` | repo root | |
-| C7 | Publish the copy/verification irregularities on `flagged.html` | needs review | `578585c0` | `flagged.html` | Section 14 — copy-provenance items |
+| C6 | Integration: PR → `main`, merge, confirm GitHub Pages deploy, record result here | done | `578585c0` | repo root | Merged via PR #4 (`a940729`) |
+| C7 | Publish the copy/verification irregularities on `flagged.html` | needs review | `578585c0` | `flagged.html` | Section 15–16 — copy-provenance & merge items |
 | C8 | Baseball-data tables on the site (per-row official source links) | needs review | `578585c0` | `flagged.html`, `docs/` | The site renders no static data tables: every row is fetched live from the StatsAPI at request time and linked to its own `statsapi.mlb.com` endpoint (see "Data tables" below) |
+| C9 | Independent line-by-line official StatsAPI re-verification (`2026-08-26` + upcoming `2027-02-19` Spring Training + `2027-03-25` Opening Day `gamePk: 853719`), smoke regression §[14] for upcoming pregame feeds, and 100% external official source links on every `flagged.html` table row | done | `d78ea508` | `tools/smoke-test.mjs`, `flagged.html`, `docs/verification-report.md`, `COORDINATION.md` | Assigned Arena branch `arena/d78ea508-alert5` (rebased onto `main` @ `7926d31` preserving all prior sessions' work) |
 
 ---
 
@@ -300,6 +301,7 @@ verbatim — no other session's work was discarded.
 - Main-branch push Site checks run `45700324014` → **success**.
 - Live site fetched after deploy: <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26> renders the 2026-08-26 replay feed (15 games · 10 reviews · 8 challenges · 2 umpire reviews · 68 ABS challenges · 1 run at risk · rows carry official `MLB API ↗` playByPlay links, incl. PHI @ SEA `gamePk 823096` Bot 5 and CIN @ SF `gamePk 823180` Top 7 / Top 9, matching the reference site). Dynamic tracked-entry counts differ per browser log by design (local log).
 - Net contribution of PR #3 to `main` (non-overlapping only): `flagged.html` COPY banner, `tests/README.md` + `tests/link-check.mjs` `/Alert5/` project-prefix links, this record. The integrated copy itself was delivered by sessions `578585c0` (PR #4 + #2 merge chain), `7693d136` (PR #1/#6/#10), `79f6678f` (PR #8) and `ec8b9e36` (PR #9).
+
 ## Deployment record (session `6a131ebb`)
 
 | Step | Result |
@@ -319,3 +321,14 @@ Live checks after the deploy (2026-11-25 ≈ 21:07 UTC):
 - <https://kanlerxz87-cyber.github.io/Alert5/flagged.html> → this board's flagged items including §18 of this session.
 
 **Conclusion:** the copy is published and behaves like the reference site. Two things remain outside this session's control and are flagged, not fixed: logo/headshot hosts and live‐API calls cannot be exercised from the sandbox (both verified working from a real browser via the fetches above), and no live review has occurred yet in this copy's lifetime — the first live alerts will be observable on the next official game day, **2027-02-19** (17 games) per the official schedule.
+
+## Session `d78ea508` — upcoming-season pregame smoke regression & 100% official row-link audit (2026-11-25)
+
+- **Branch:** `arena/d78ea508-alert5` (Arena platform fixed-branch constraint; rebased cleanly onto integrated `main` @ `4978b9f` so zero work from sessions `7693d136`, `578585c0`, `79f6678f`, `ec8b9e36`, `6abe8874`, or `6a131ebb` was overwritten).
+- **What was verified from official sources (`statsapi.mlb.com` / `mlb.com`):**
+  1. `2026-08-26` reference slate ([schedule](https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26&hydrate=probablePitcher,linescore,decisions,review), [823096 playByPlay](https://statsapi.mlb.com/api/v1/game/823096/playByPlay), [823180 counters](https://statsapi.mlb.com/api/v1.1/game/823180/feed/live?fields=gameData,review,absChallenges,hasChallenges,away,home,used,remaining,usedSuccessful,usedFailed)) and reference page (<https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26>).
+  2. Upcoming 2027 MLB season dates ([schedule 2026-11-25..2027-03-26](https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-11-25&endDate=2027-03-26&fields=dates,date,totalGames) -> Spring Training `2027-02-19` with 17 games; [Opening Day 2027-03-25](https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-03-25&hydrate=probablePitcher,linescore,decisions,review) with 14 games; pregame [game/853719/feed/live](https://statsapi.mlb.com/api/v1.1/game/853719/feed/live) CWS @ DET).
+  3. Complete 30-club abbreviations ([teams?sportId=1](https://statsapi.mlb.com/api/v1/teams?sportId=1&fields=teams,id,name,abbreviation)), review/game status registry ([gameStatus](https://statsapi.mlb.com/api/v1/gameStatus), including `T9` `abstractGameState: "Preview"` vs `abstractGameCode: "L"`), event types ([eventTypes](https://statsapi.mlb.com/api/v1/eventTypes)), and [MLB Official Scoring Changes](https://www.mlb.com/official-information/scoring-changes).
+- **Non-overlapping contributions added (PR #13):**
+  - `tools/smoke-test.mjs` §[14] (+3 assertions -> **67 passed, 0 failed**): deterministic smoke coverage for upcoming 2027 Opening Day pregame `schedule` + `feed/live` shapes (`Scheduled` + `startTimeTBD` -> `TBD` + blank scores on `index.html`, pregame `playByPlay` skip on `reviews.html`, and `Pregame` card + `–` scores on `game.html`).
+  - `flagged.html` (`CP-11` external GitHub link + §19 `D7-1…D7-4`) & `docs/verification-report.md` §8: 100% of rows across all 18 HTML tables in `flagged.html` carry external official source links; unconfirmed items (`v1.0.0-stable-checkpoint` tag on `Alert5`, 2027 pregame `absChallenges` allocations) are left blank and flagged.

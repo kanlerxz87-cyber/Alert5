@@ -1234,6 +1234,135 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
   dom.window.close();
 }
 
+/* ----------------------------------------------------- [14] upcoming game days */
+
+console.log('\n[14] Upcoming game days (2027-03-25 Opening Day & startTimeTBD preview shape)');
+{
+  /* Official shapes verified 2026-11-25 from GET /api/v1/schedule?sportId=1&date=2027-03-25
+   * &hydrate=probablePitcher,linescore,decisions,review, GET /api/v1/schedule?sportId=1&date=2027-04-01,
+   * and GET /api/v1.1/game/853719/feed/live */
+  const UPCOMING_SCHEDULE = {
+    totalGames: 2,
+    dates: [{
+      date: '2027-03-25',
+      totalGames: 2,
+      games: [
+        {
+          gamePk: 853719,
+          gameDate: '2027-03-25T17:10:00Z',
+          officialDate: '2027-03-25',
+          status: { abstractGameState: 'Preview', codedGameState: 'S', detailedState: 'Scheduled', statusCode: 'S', startTimeTBD: false, abstractGameCode: 'P' },
+          teams: {
+            away: { team: { id: 145, name: 'Chicago White Sox' }, leagueRecord: { wins: 0, losses: 0, ties: 0, pct: '.000' } },
+            home: { team: { id: 116, name: 'Detroit Tigers' }, leagueRecord: { wins: 0, losses: 0, ties: 0, pct: '.000' } },
+          },
+          linescore: { scheduledInnings: 9, innings: [], teams: { home: {}, away: {} } },
+          venue: { id: 2394, name: 'Comerica Park' },
+          doubleHeader: 'N',
+          gamesInSeries: 3,
+          seriesGameNumber: 1,
+          review: { hasChallenges: false, away: { used: 0, remaining: 1 }, home: { used: 0, remaining: 1 } },
+        },
+        {
+          gamePk: 854204,
+          gameDate: '2027-03-25T07:33:00Z',
+          officialDate: '2027-03-25',
+          status: { abstractGameState: 'Preview', codedGameState: 'S', detailedState: 'Scheduled', statusCode: 'S', startTimeTBD: true, abstractGameCode: 'P' },
+          teams: {
+            away: { team: { id: 110, name: 'Baltimore Orioles' }, leagueRecord: { wins: 0, losses: 0, ties: 0, pct: '.000' } },
+            home: { team: { id: 147, name: 'New York Yankees' }, leagueRecord: { wins: 0, losses: 0, ties: 0, pct: '.000' } },
+          },
+          linescore: { scheduledInnings: 9, innings: [], teams: { home: {}, away: {} } },
+          venue: { id: 3313, name: 'Yankee Stadium' },
+          doubleHeader: 'N',
+          gamesInSeries: 3,
+          seriesGameNumber: 1,
+          review: { hasChallenges: false, away: { used: 0, remaining: 1 }, home: { used: 0, remaining: 1 } },
+        },
+      ],
+    }],
+  };
+
+  const UPCOMING_FEED = {
+    gamePk: 853719,
+    gameData: {
+      game: { pk: 853719, season: '2027', seriesGameNumber: 1, gamesInSeries: 3 },
+      datetime: { dateTime: '2027-03-25T17:10:00Z', officialDate: '2027-03-25' },
+      status: { abstractGameState: 'Preview', codedGameState: 'S', detailedState: 'Scheduled', statusCode: 'S', startTimeTBD: false },
+      teams: {
+        away: { id: 145, name: 'Chicago White Sox', abbreviation: 'CWS', record: { wins: 0, losses: 0 } },
+        home: { id: 116, name: 'Detroit Tigers', abbreviation: 'DET', record: { wins: 0, losses: 0 } },
+      },
+      venue: { name: 'Comerica Park' },
+      players: {},
+    },
+    liveData: {
+      plays: { allPlays: [] },
+      linescore: { scheduledInnings: 9, innings: [], teams: { away: {}, home: {} } },
+      boxscore: {
+        teams: {
+          away: { team: { id: 145, name: 'Chicago White Sox' }, batters: [], pitchers: [], players: {} },
+          home: { team: { id: 116, name: 'Detroit Tigers' }, batters: [], pitchers: [], players: {} },
+        },
+      },
+      decisions: {},
+    },
+  };
+
+  let gameCalls = 0;
+  const upcomingFetch = (url) => {
+    const u = String(url);
+    if (u.includes('/schedule?')) {
+      return Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: async () => UPCOMING_SCHEDULE });
+    }
+    if (u.includes('/game/853719/feed/live')) {
+      return Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: async () => UPCOMING_FEED });
+    }
+    if (u.includes('/playByPlay')) {
+      gameCalls += 1;
+      return Promise.resolve({ ok: true, status: 200, headers: { get: () => null }, json: async () => ({ allPlays: [] }) });
+    }
+    return routeFetch(url);
+  };
+
+  await check('Upcoming scoreboard renders Scheduled cards, startTimeTBD as TBD, and blank scores', async () => {
+    const sbDom = await boot('index.html?date=2027-03-25', { fetchImpl: upcomingFetch, beforeParse(x) { x.localStorage.clear(); } });
+    await new Promise((r) => setTimeout(r, 400));
+    const listText = text(sbDom.window.document.getElementById('game-list'));
+    assert(listText.includes('Chicago White Sox') && listText.includes('Detroit Tigers'), 'teams missing: ' + listText);
+    assert(listText.includes('Scheduled') && listText.includes('Comerica Park'), 'status/venue missing: ' + listText);
+    assert(listText.includes('TBD'), 'startTimeTBD game must display TBD instead of placeholder timestamp: ' + listText);
+    const scores = [...sbDom.window.document.querySelectorAll('.team-score')].map((el) => el.textContent.trim());
+    assert(scores.every((s) => s === ''), 'pregame scores must remain blank, got: ' + JSON.stringify(scores));
+    sbDom.window.close();
+  });
+
+  await check('Upcoming Replay Feed skips playByPlay polling until game flips Live and shows empty-state notice', async () => {
+    gameCalls = 0;
+    const rfDom = await boot('reviews.html?date=2027-03-25', { fetchImpl: upcomingFetch, beforeParse(x) { x.localStorage.clear(); } });
+    await new Promise((r) => setTimeout(r, 450));
+    assert(gameCalls === 0, 'Preview games must not poll playByPlay before first pitch, got ' + gameCalls);
+    const statusText = text(rfDom.window.document.getElementById('status-line'));
+    assert(/2 game\(s\) on .*Mar 25, 2027.*0 live/.test(statusText), 'status line mismatch: ' + statusText);
+    const feedText = text(rfDom.window.document.getElementById('feed-list'));
+    assert(/No tracked events for this date and filter yet/.test(feedText), 'empty notice missing: ' + feedText);
+    rfDom.window.close();
+  });
+
+  await check('Upcoming game page renders Pregame state cleanly with blank (–) scores and no errors', async () => {
+    const gDom = await boot('game.html?gamePk=853719&date=2027-03-25', { fetchImpl: upcomingFetch, beforeParse(x) { x.localStorage.clear(); } });
+    await new Promise((r) => setTimeout(r, 450));
+    const header = text(gDom.window.document.querySelector('.game-header'));
+    assert(header.includes('Chicago White Sox') && header.includes('Detroit Tigers'), 'game header teams missing: ' + header);
+    assert(header.includes('–'), 'pregame header scores must render – when absent: ' + header);
+    const livePanel = text(gDom.window.document.getElementById('live-panel'));
+    assert(/Pregame.*Scheduled/.test(livePanel), 'pregame panel missing: ' + livePanel);
+    const pbp = text(gDom.window.document.getElementById('plays-wrap'));
+    assert(/No plays yet/.test(pbp), 'pregame play-by-play fallback missing: ' + pbp);
+    gDom.window.close();
+  });
+}
+
 function __setDate(dom) {
   const picker = dom.window.document.getElementById('date-picker');
   if (picker) {
