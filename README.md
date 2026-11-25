@@ -17,7 +17,7 @@ npm run test:official # requires access to statsapi.mlb.com
 npm run serve        # optional local server, port 8000, binds 0.0.0.0
 ```
 
-[Copy verification](docs/alert5-copy-verification.md) records the scope and limitations. Unofficial model probability/adjustment displays are withheld in this copy to honor the official-values-only requirement; TBD start times are respected. The remaining application behavior is preserved. The upstream documentation below is historical, not a fresh Alert5 verification. Its upstream URLs, dates and checkpoint tag refer to LIVPBP; that tag is not installed in this repository.
+[Copy verification](docs/alert5-copy-verification.md) records the scope and limitations. Parallel integration PR #4 restored upstream model probability/adjustment displays for reference parity. These are local, unverified calculations, not official MLB values; see the published review flags. TBD start times are respected. The remaining application behavior is preserved. The upstream documentation below is historical, not a fresh Alert5 verification. Its upstream URLs, dates and checkpoint tag refer to LIVPBP; that tag is not installed in this repository.
 
 ---
 
