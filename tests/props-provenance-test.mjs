@@ -21,7 +21,7 @@ try {
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const dom = new JSDOM('<!doctype html><html><body><div id="mount"></div></body></html>', {
-  url: 'https://snapquast73-boop.github.io/LIVPBP/game.html?gamePk=824638',
+  url: 'https://kanlerxz87-cyber.github.io/Alert5/game.html?gamePk=824638',
   runScripts: 'outside-only',
   pretendToBeVisual: true,
 });

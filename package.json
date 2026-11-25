@@ -1,14 +1,16 @@
 {
-  "name": "alert5-mlb-live-pbp",
+  "name": "mlb-live-pbp",
   "version": "1.0.0",
   "private": true,
-  "description": "MLB Live PBP \u2014 live MLB scoreboard, play-by-play and replay-review feed (static site, GitHub Pages). Copied from snapquast73-boop/LIVPBP for Alert5.",
+  "description": "MLB Live PBP \u2014 live MLB scoreboard, play-by-play and replay-review feed (static site, GitHub Pages).",
   "homepage": "https://kanlerxz87-cyber.github.io/Alert5/",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "test": "node tools/smoke-test.mjs",
-    "serve": "node server.mjs"
+    "serve": "node server.mjs",
+    "test:all": "node tests/run-all.mjs && node tests/props-provenance-test.mjs && node tools/restoration-check.mjs && npm test",
+    "test:official": "node tests/upcoming-official.mjs"
   },
   "devDependencies": {
     "jsdom": "^31.0.1"

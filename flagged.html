@@ -20,6 +20,22 @@
   </header>
 
   <main class="flagged-main">
+    <section id="alert5-verification" class="flagged-intro">
+      <h1>Alert5 copy verification — 2026-11-25</h1>
+      <p>This site was copied from <a href="https://github.com/snapquast73-boop/LIVPBP/tree/5c02527d3c7a56ea66c698cfabff80a407b6dfd3">LIVPBP at commit 5c02527</a>, under its MIT license.
+      Everything below this section is <strong>inherited upstream audit history, not a fresh verification by Alert5</strong>.
+      Its dates and prior deployment claims refer to that repository. The original task board is preserved in
+      <a href="audit/upstream-coordination.md">upstream coordination history</a>.</p>
+      <ul>
+        <li><strong>Unverified:</strong> future live alert latency, browser audio permission and upstream API availability cannot be guaranteed. Alerts require an open page; no background push service is provided.</li>
+        <li><strong>Unverified model values withheld:</strong> upstream hit probabilities, tiers and driver adjustments are not official MLB values. This copy leaves those numeric displays blank and labels them unverified. Official batter/pitcher inputs and their source links remain available. <a href="https://statsapi.mlb.com/api/v1/people/605141/stats?stats=season&amp;group=hitting&amp;season=2026">Official MLB statistics endpoint</a> (not a source for model probabilities).</li>
+        <li><strong>Verified field-handling correction:</strong> upcoming schedules include <code>status.startTimeTBD=true</code> alongside a placeholder <code>gameDate</code>. This copy shows TBD rather than that placeholder time. <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01">Official upcoming slate</a>.</li>
+        <li><strong>Hosting limitation:</strong> GitHub Pages cannot run <code>server.mjs</code>; shared persistence is unavailable there. The upstream browser-local log remains supported. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">GitHub Pages documentation</a>.</li>
+        <li><strong>Not independently reverified:</strong> historical fixture literals and all older audit claims. Tests using those fixtures verify behavior, not current MLB facts. Blank or dash values must not be interpreted as zero. Use each displayed row’s official MLB source link for manual review.</li>
+      </ul>
+      <p><a href="docs/alert5-copy-verification.md">Copy verification scope, sources and tests</a> · <a href="COORDINATION.md">Current coordination board</a></p>
+    </section>
+
     <div class="flagged-intro">
       <h1 style="margin-top:0">Flagged for Review</h1>
       <p>

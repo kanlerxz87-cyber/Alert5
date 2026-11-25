@@ -148,7 +148,7 @@ async function render(pageFile, { query = '', wait = 900, before } = {}) {
   html = html.replace(/<script\b[^>]*src\s*=\s*"[^"]+"[^>]*><\/script>/gi, '');
 
   const errors = [];
-  const url = `https://snapquast73-boop.github.io/LIVPBP/${pageFile}${query}`;
+  const url = `https://kanlerxz87-cyber.github.io/Alert5/${pageFile}${query}`;
   const dom = new JSDOM(html, {
     url,
     runScripts: 'outside-only',
@@ -298,6 +298,16 @@ console.log(`jsdom-render-test: ${LIVE ? 'LIVE official API' : 'fixtures'} mode`
   check('404: back link present', !!doc.querySelector('a[href="index.html"]'));
   check('404: no uncaught errors', errors.length === 0, errors.join(' | '));
   close();
+}
+
+// Execute the inline base tag script at a nested Pages URL, not just /404.html.
+{
+  const dom = new JSDOM(readFileSync(path.join(ROOT, '404.html'), 'utf8'), {
+    url: 'https://kanlerxz87-cyber.github.io/Alert5/missing/deep/path', runScripts: 'dangerously',
+  });
+  check('404: nested Pages stylesheet stays inside Alert5', dom.window.document.querySelector('link[rel="stylesheet"]').href === 'https://kanlerxz87-cyber.github.io/Alert5/assets/css/style.css');
+  check('404: nested Pages back link stays inside Alert5', dom.window.document.querySelector('a').href === 'https://kanlerxz87-cyber.github.io/Alert5/index.html');
+  dom.window.close();
 }
 
 console.log(`jsdom-render-test: ${passes.length} checks passed`);
