@@ -46,9 +46,10 @@ infer or fill in a value.** Anything that cannot be confirmed is left blank and 
 | C3 | Verify the official data sources the site depends on, line by line | done | `578585c0` | `docs/`, `flagged.html` | See verification log below |
 | C4 | Confirm the test suites pass (smoke, jsdom render, link check, contract, provenance) | done | `578585c0` | `tools/`, `tests/` | See verification log |
 | C5 | Confirm the site builds and serves with no broken links (local server + static link check) | done | `578585c0` | repo root | See verification log |
-| C6 | Integration: PR → `main`, merge, confirm GitHub Pages deploy, record result here | in progress | `578585c0` | repo root | |
-| C7 | Publish the copy/verification irregularities on `flagged.html` | needs review | `578585c0` | `flagged.html` | Section 14 — copy-provenance items |
+| C6 | Integration: PR → `main`, merge, confirm GitHub Pages deploy, record result here | done | `578585c0` | repo root | Merged via PR #4 (`a940729`) |
+| C7 | Publish the copy/verification irregularities on `flagged.html` | needs review | `578585c0` | `flagged.html` | Section 15–16 — copy-provenance & merge items |
 | C8 | Baseball-data tables on the site (per-row official source links) | needs review | `578585c0` | `flagged.html`, `docs/` | The site renders no static data tables: every row is fetched live from the StatsAPI at request time and linked to its own `statsapi.mlb.com` endpoint (see "Data tables" below) |
+| C9 | Independent line-by-line official StatsAPI re-verification (`2026-08-26` + upcoming `2027-02-19` Spring Training + `2027-03-25` Opening Day `gamePk: 853719`), smoke regression §[14] for upcoming pregame feeds, and 100% external official source links on every `flagged.html` table row | in progress | `d78ea508` | `tools/smoke-test.mjs`, `flagged.html`, `docs/verification-report.md`, `COORDINATION.md` | Assigned Arena branch `arena/d78ea508-alert5` (rebased onto `main` @ `434d608` preserving all `578585c0` + `7693d136` work) |
 
 ---
 
