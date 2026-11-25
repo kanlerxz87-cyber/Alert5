@@ -80,6 +80,16 @@ Findings:
 Irregularities logged (see "Irregularities" below): F-COPY-1 … F-COPY-6, plus the carried-over
 reference list (U-* and I-* on `flagged.html`).
 
+### 2026-11-25T20:52Z — `arena-6abe8874` — checks all green (T-5, T-6)
+
+- `node tools/restoration-check.mjs` — **ALL CHECKS PASSED** (local refs, JS parse, server contract incl. `/api/health`, feed-log round-trip, static 200s, `/.git/HEAD` → 403).
+- `node tests/run-all.mjs` — syntax PASS · link-check PASS (41 local refs) · contract-check PASS (8 bindings/5 pages) · jsdom-render-test PASS (**47/47**).
+- `npm test` (smoke-test, jsdom + stubbed fetch) — **64 passed, 0 failed**.
+- `node tests/props-provenance-test.mjs` — **5 passed, 0 failed** (every rendered table row carries an official statsapi.mlb.com source link; zero fabricated values).
+- `node server.mjs` (PORT=8123) — `/`, `/index.html`, `/game.html`, `/reviews.html`, `/flagged.html`, `/404.html`, CSS/JS assets, `/api/health` all **200**; health JSON `{"status":"ok"}`. Smoke server stopped afterwards.
+- Byte-parity with the reference tree for everything except the 8 adapted files: `diff -qr` shows only `404.html`, `README.md`, `flagged.html`, `package.json`, `tests/README.md`, `tests/jsdom-render-test.mjs`, `tests/link-check.mjs`, `tests/props-provenance-test.mjs` (the intended adaptations) plus the replaced `COORDINATION.md` (dropped, this board) and an empty `data/` (removed; git-ignored).
+- CI: `site-check.yml` runs `node tools/restoration-check.mjs` on PRs/pushes to `main` and `npm ci && npm test` in a second job; `package-lock.json` is present and pins `jsdom@^31.0.1` so `npm ci` works.
+
 ### 2026-11-25T20:50Z — `arena-6abe8874` — official-source spot checks (T-4)
 
 Performed against the official MLB StatsAPI (links below open the exact requests):
