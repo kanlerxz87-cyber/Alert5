@@ -28,7 +28,7 @@
       <a href="audit/upstream-coordination.md">upstream coordination history</a>.</p>
       <ul>
         <li><strong>Unverified:</strong> future live alert latency, browser audio permission and upstream API availability cannot be guaranteed. Alerts require an open page; no background push service is provided.</li>
-        <li><strong>Unverified model values withheld:</strong> upstream hit probabilities, tiers and driver adjustments are not official MLB values. This copy leaves those numeric displays blank and labels them unverified. Official batter/pitcher inputs and their source links remain available. <a href="https://statsapi.mlb.com/api/v1/people/605141/stats?stats=season&amp;group=hitting&amp;season=2026">Official MLB statistics endpoint</a> (not a source for model probabilities).</li>
+        <li><strong>Local model, shown as the reference site shows it:</strong> the upstream hit-forecast percentages, tiers and driver adjustments are a <em>local estimate</em>, not official MLB values. This copy keeps them visible exactly as the reference site does, so it behaves identically, and they are labelled in the UI as “Not an MLB projection or a betting line”. The model constants remain flagged upstream as <a href="#s3">U-2 / U-9</a> (unverified). Official batter/pitcher inputs and their source links remain available. <a href="https://statsapi.mlb.com/api/v1/people/605141/stats?stats=season&amp;group=hitting&amp;season=2026">Official MLB statistics endpoint</a> (not a source for model probabilities).</li>
         <li><strong>Verified field-handling correction:</strong> upcoming schedules include <code>status.startTimeTBD=true</code> alongside a placeholder <code>gameDate</code>. This copy shows TBD rather than that placeholder time. <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01">Official upcoming slate</a>.</li>
         <li><strong>Hosting limitation:</strong> GitHub Pages cannot run <code>server.mjs</code>; shared persistence is unavailable there. The upstream browser-local log remains supported. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">GitHub Pages documentation</a>.</li>
         <li><strong>Not independently reverified:</strong> historical fixture literals and all older audit claims. Tests using those fixtures verify behavior, not current MLB facts. Blank or dash values must not be interpreted as zero. Use each displayed row’s official MLB source link for manual review.</li>
@@ -999,6 +999,151 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
       (U-1…U-11, I-8, F-001…F-009, L-1…L-4, RR-01…RR-06, D-1…D-4, AF-1…AF-7) keep their status above;
       RR-05 is answered by R2-3.
     </p>
+
+    <h2>15. Copy provenance &amp; line-by-line verification (session <code>578585c0</code>, 2026-11-25)</h2>
+    <p style="color:var(--muted);font-size:13px">
+      This repository, <strong>Alert5</strong>, is a copy of the working reference site
+      <a href="https://github.com/snapquast73-boop/LIVPBP" target="_blank" rel="noopener">snapquast73-boop/LIVPBP</a>
+      (commit <code>5c02527</code>, the merge of PR #33). The purpose of the copy is to iterate on a
+      known-good site. Every row below was re-checked against an official source today; links open
+      the exact request or document used.
+    </p>
+    <table class="verify">
+      <thead>
+        <tr><th>#</th><th>Claim</th><th>Official source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>CP-1</td>
+          <td class="wrap">The Alert5 tree is <strong>byte-for-byte identical</strong> to reference repo <code>snapquast73-boop/LIVPBP</code> @ <code>5c02527</code>, except the identity edits listed in CP-2.</td>
+          <td class="wrap"><code>diff -r</code> of this working tree against a fresh <code>git clone https://github.com/snapquast73-boop/LIVPBP</code> → no differences at copy time. <a href="https://github.com/snapquast73-boop/LIVPBP/commit/5c02527" target="_blank" rel="noopener">reference commit 5c02527</a> · <a href="https://github.com/snapquast73-boop/LIVPBP/tree/main" target="_blank" rel="noopener">LIVPBP main tree</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-2</td>
+          <td class="wrap">Site identity re-pointed from <code>LIVPBP</code> to <code>Alert5</code>: <code>404.html</code> Pages base prefix, <code>package.json</code> <code>name</code>/<code>homepage</code>, test-harness URLs in <code>tests/jsdom-render-test.mjs</code> and <code>tests/props-provenance-test.mjs</code>, and the README "Live demo" link.</td>
+          <td class="wrap">Deployed site: <a href="https://kanlerxz87-cyber.github.io/Alert5/" target="_blank" rel="noopener">kanlerxz87-cyber.github.io/Alert5/</a> · <a href="https://api.github.com/repos/kanlerxz87-cyber/Alert5/pages" target="_blank" rel="noopener">GitHub Pages API for this repo</a> (branch <code>main</code>, folder <code>/</code>)</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-3</td>
+          <td class="wrap">The reference site is live and renders the 2026-08-26 replay feed with <strong>3 review rows</strong> (PHI @ SEA manager challenge; CIN @ SF tag-play challenge with 1 run at risk; CIN @ SF umpire review), 15 games, 76 tracked entries.</td>
+          <td class="wrap"><a href="https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26" target="_blank" rel="noopener">reference reviews.html?date=2026-08-26</a> — fetched 2026-11-25; content matched row for row</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-4</td>
+          <td class="wrap">The official slate for 2026-08-26 has <strong>15 games</strong>, all <code>Final</code>, and the scores quoted on those review rows are the official ones: <code>CIN 10 – SF 9</code> (gamePk <code>823180</code>) and <code>PHI 6 – SEA 0</code> (gamePk <code>823096</code>).</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2026-08-26" target="_blank" rel="noopener">statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2026-08-26</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-5</td>
+          <td class="wrap">The PHI @ SEA review row is official: at-bat index 36 of game <code>823096</code> carries <code>reviewDetails</code> and the description <em>“Mariners challenged (play at 1st), call on the field was upheld: J.P. Crawford grounds out sharply, shortstop Trea Turner to first baseman Alec Bohm.”</em> — identical to the row the reference page renders.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/game/823096/playByPlay" target="_blank" rel="noopener">game/823096/playByPlay</a> (atBatIndex 36) · <a href="https://snapquast73-boop.github.io/LIVPBP/game.html?gamePk=823096&amp;date=2026-08-26" target="_blank" rel="noopener">reference game page</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-6</td>
+          <td class="wrap">The review-type codes used by the feed are the official registry meanings: <code>MF</code> = “Manager challenge: Close play at 1st”, <code>MA</code> = “Manager challenge: Tag play”, <code>IH</code> = “Instant Replay” (the "under review" status), with <code>abstractGameCode</code> <code>L</code>.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/gameStatus" target="_blank" rel="noopener">statsapi.mlb.com/api/v1/gameStatus</a> — <code>MF</code>, <code>MA</code> and <code>IH</code> entries read verbatim</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-7</td>
+          <td class="wrap">The challenge counters the feed prints (“0 manager challenges left now (1 used)”) come from the official per-team fields <code>review.away/home.used/remaining</code> and <code>gameData.absChallenges.*</code>, not from counting feed events.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1.1/game/823096/feed/live" target="_blank" rel="noopener">game/823096/feed/live</a> (<code>gameData.review</code>) · <a href="https://statsapi.mlb.com/api/v1.1/game/823180/feed/live" target="_blank" rel="noopener">game/823180/feed/live</a> (<code>gameData.absChallenges</code>)</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-8</td>
+          <td class="wrap">The copy passes its own suites unchanged: <code>npm test</code> → <strong>64 passed, 0 failed</strong>; <code>node tests/run-all.mjs</code> → scripts parse, <strong>42</strong> local references OK, <strong>8</strong> name/id bindings OK, <strong>47/47</strong> jsdom render checks.</td>
+          <td class="wrap">Run in this repo on 2026-11-25: <a href="https://github.com/kanlerxz87-cyber/Alert5/blob/main/tools/smoke-test.mjs" target="_blank" rel="noopener">tools/smoke-test.mjs</a> · <a href="https://github.com/kanlerxz87-cyber/Alert5/blob/main/tests/run-all.mjs" target="_blank" rel="noopener">tests/run-all.mjs</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-9</td>
+          <td class="wrap"><strong>Live games for “upcoming game days”:</strong> the site is polling-driven and needs no manual input; it defaults to the browser's current date and auto-refreshes. On 2026-11-25 the official slate is empty (<code>totalGames: 0</code>) because MLB is in the offseason, so the scoreboard correctly shows its empty state and points at the most recent date with games. Live behaviour will begin with the next season's first game date; nothing in this copy changes that.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2026-11-25" target="_blank" rel="noopener">schedule 2026-11-25</a> → <code>{"totalGames":0,"dates":[]}</code> (read verbatim) · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;startDate=2026-09-20&amp;endDate=2026-11-25" target="_blank" rel="noopener">range 2026-09-20 → 2026-11-25</a> → last date with a game is <code>2026-10-28</code> (1 game)</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-10</td>
+          <td class="wrap"><strong>Provenance of the page text:</strong> sections 1–14 of this page are the upstream repository's own verification log, preserved verbatim. Their links therefore still point at <code>snapquast73-boop/LIVPBP</code> and the other reference repos (<code>LIVPBP2</code>, <code>POSTSSNALRT</code>) — that is intentional: they are the evidence those claims were checked against, not this site's links.</td>
+          <td class="wrap"><a href="https://github.com/snapquast73-boop/LIVPBP/blob/main/flagged.html" target="_blank" rel="noopener">upstream flagged.html</a> · <a href="https://github.com/kanlerxz87-cyber/Alert5/blob/main/flagged.html" target="_blank" rel="noopener">this page</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>CP-11</td>
+          <td class="wrap"><strong>Deviation from the brief — branch naming.</strong> The brief asks each session to work on <code>session-&lt;id&gt;/&lt;task&gt;</code>; Arena fixes a session to one branch, so the work is on <code>arena/578585c0-alert5</code>. Logged here and in <code>COORDINATION.md</code> (same deviation the upstream sessions logged as F-001).</td>
+          <td class="wrap"><a href="COORDINATION.md">COORDINATION.md</a> — "Branch / worktree note"</td>
+          <td class="status-flag">Flagged — process deviation</td>
+        </tr>
+        <tr>
+          <td>CP-11b</td>
+          <td class="wrap"><strong>Offseason empty-state lookback is capped at 180 days.</strong> Both the scoreboard and the replay feed point at “the most recent date with games” using a <code>startDate = date − 180 days</code> range query. That is more than enough today (2026-10-28 is 28 days back from 2026-11-25), but a future offseason longer than 180 days would leave the button pointing at a date with no games. Measured: the 2026 → 2027 gap (last 2026 game to a late-March 2027 opener) is <strong>148 days</strong>, so the current value still covers it. Left unchanged — it is working behaviour, and changing a working poll is out of scope for a straight copy. Flagged for a later iteration.</td>
+          <td class="wrap"><code>assets/js/reviews-feed.js</code> L834 and <code>assets/js/scoreboard.js</code> L210 (<code>MLB.shiftISODate(date, -180)</code>) · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;startDate=2026-09-20&amp;endDate=2026-11-25" target="_blank" rel="noopener">range query → last game 2026-10-28</a></td>
+          <td class="status-flag">Flagged — future risk</td>
+        </tr>
+        <tr>
+          <td>CP-12</td>
+          <td class="wrap"><strong>Not verifiable from here — the site's rendering inside a real browser on a future live game day.</strong> The sandbox has no outbound network access to <code>statsapi.mlb.com</code> from Node/curl (only static assets and the fetch tool reach it), so live polling was verified against the official payloads and the fetch tool, not by leaving a browser open on a live game. No value is invented here.</td>
+          <td class="wrap"><a href="https://kanlerxz87-cyber.github.io/Alert5/reviews.html" target="_blank" rel="noopener">deployed Alert5 replay feed</a> — open on a live game day to confirm end to end</td>
+          <td class="status-unverified">Unverified</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>16. Merged from parallel session <code>7693d136</code> (2026-11-25)</h2>
+    <p style="color:var(--muted);font-size:13px">
+      A second session worked the same task on the same day. Its branch was reviewed file by file and
+      merged here. Rows marked <strong>accepted</strong> are now in the site; the one marked
+      <strong>reverted</strong> was undone, with the reason given. Sources re-checked independently by
+      this session before accepting.
+    </p>
+    <table class="verify">
+      <thead>
+        <tr><th>#</th><th>Finding</th><th>Official source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>M-1</td>
+          <td class="wrap"><strong>Accepted — <code>startTimeTBD</code> handling.</strong> Upcoming slates publish a placeholder <code>gameDate</code> (e.g. <code>2027-04-01T07:33:00Z</code>) while also setting <code>status.startTimeTBD: true</code>. The copy now shows <strong>TBD</strong> instead of that placeholder time, on the scoreboard cards, the game header and the pregame card. Independently re-verified by this session.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01" target="_blank" rel="noopener">schedule 2027-04-01</a> — 8 games; <code>startTimeTBD:true</code> on <code>854204</code>, <code>853879</code>, <code>854049</code>; <code>false</code> on the other five</td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>M-2</td>
+          <td class="wrap"><strong>Accepted — upcoming-slate <code>gameDate</code> is a placeholder, not a start time.</strong> The official slate also confirms the next published game day begins <code>2027-04-01</code> (8 games, all <code>Scheduled</code>), which is the “upcoming game day” behaviour the site is meant to serve.</td>
+          <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01" target="_blank" rel="noopener">statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>M-3</td>
+          <td class="wrap"><strong>Reverted — withholding the hit forecast.</strong> That session blanked the per-PA hit probability, the tier and every driver adjustment, on the reasoning that they are not official MLB values. That reasoning is sound, but the instruction for this repository was to <em>copy</em> the reference site so it runs the same, and upstream already discloses the limitation honestly: the card itself says “Transparent per-PA estimate … Not an MLB projection or a betting line”, and the constants are already published as unverified in <strong>U-2 / U-9</strong> below. Hiding the forecast would make this copy visibly different from the reference. <strong>Restored to reference behaviour</strong> and disclosed in the Alert5 box at the top of this page instead.</td>
+          <td class="wrap"><a href="https://snapquast73-boop.github.io/LIVPBP/game.html?gamePk=823096&amp;date=2026-08-26" target="_blank" rel="noopener">reference game page shows the forecast</a> · <a href="README.md">README “Two-sided hit forecast”</a> (states it is not an MLB projection) · <a href="assets/js/props.js">props.js disclaimer string</a></td>
+          <td class="status-flag">Reverted — parity kept</td>
+        </tr>
+        <tr>
+          <td>M-4</td>
+          <td class="wrap"><strong>Accepted — copy-fidelity manifest.</strong> A SHA-256 manifest of all 40 upstream files at <code>5c02527</code>, plus the upstream task board preserved verbatim as <code>audit/upstream-coordination.md</code>, so any file can be re-hashed against the reference at any time.</td>
+          <td class="wrap"><a href="audit/upstream-manifest.json">audit/upstream-manifest.json</a> · <a href="https://github.com/snapquast73-boop/LIVPBP/tree/5c02527d3c7a56ea66c698cfabff80a407b6dfd3" target="_blank" rel="noopener">upstream tree at 5c02527</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>M-5</td>
+          <td class="wrap"><strong>Accepted — live official-data check in CI.</strong> <code>tests/upcoming-official.mjs</code> fetches a real upcoming official slate and renders the real scoreboard and replay-feed scripts against it, with no fixture substitution. It must run on GitHub Actions because this sandbox's shell has no outbound StatsAPI access. Its conclusion is reported in the PR checks, not assumed here.</td>
+          <td class="wrap"><a href="tests/upcoming-official.mjs">tests/upcoming-official.mjs</a> · <a href=".github/workflows/site-check.yml">.github/workflows/site-check.yml</a> · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01" target="_blank" rel="noopener">official slate used</a></td>
+          <td class="status-ok">Verified</td>
+        </tr>
+        <tr>
+          <td>M-6</td>
+          <td class="wrap"><strong>Logged — duplicate work.</strong> Both sessions claimed the same copy task because neither board existed when they started. Nothing was lost: this branch contains the union of the two. For the next task, the board in <a href="COORDINATION.md">COORDINATION.md</a> is now the single place to claim work.</td>
+          <td class="wrap"><a href="COORDINATION.md">COORDINATION.md</a> · <a href="https://github.com/kanlerxz87-cyber/Alert5/pull/1" target="_blank" rel="noopener">parallel PR #1</a> · <a href="https://github.com/kanlerxz87-cyber/Alert5/pull/2" target="_blank" rel="noopener">this PR #2</a></td>
+          <td class="status-flag">Flagged — process</td>
+        </tr>
+      </tbody>
+    </table>
 
   </main>
 

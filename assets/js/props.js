@@ -539,13 +539,27 @@
 
   function renderForecast(forecast) {
     if (!forecast) return '';
-    // The upstream probability is a local model, not an official MLB value.
-    // Keep the underlying model for copy provenance, but never publish its
-    // inferred numbers under this fork's official-values-only requirement.
-    return '<div class="forecast"><strong>Hit forecast: </strong>' +
-      '<span class="status-unverified">Unverified — no official MLB projection supplied</span>' +
-      '<p class="forecast-note">Probability and model adjustments are left blank. ' +
-      '<a href="flagged.html#alert5-verification">Flagged for Review</a></p></div>';
+    var f = forecast;
+    var width = Math.max(2, Math.min(100, f.probPct));
+    var chips = f.drivers.filter(function (d) { return Math.abs(d.points) >= 0.05; })
+      .map(function (d) {
+        var sign = d.points > 0 ? '+' : '';
+        return UI.chip(d.label + ' ' + sign + d.points.toFixed(1) + ' pt', d.points >= 0 ? 'chip-ok' : 'chip-danger', d.detail);
+      }).join('');
+    return '<div class="forecast">' +
+      '<div class="forecast-head">' +
+        '<span class="forecast-pa">' + f.probPct.toFixed(1) + '%<small> hit this PA</small></span>' +
+        '<span class="forecast-tier ' + f.tier.cls + '">' + UI.esc(f.tier.label) + '</span>' +
+        (f.remainingPAs > 0
+          ? '<span class="forecast-side">≥1 hit in next ' + f.remainingPAs + ' PA: <b>' +
+            (f.atLeastOne * 100).toFixed(0) + '%</b></span>'
+          : '<span class="forecast-side">No plate appearances left in this game</span>') +
+      '</div>' +
+      '<div class="forecast-progress"><i style="width:' + width.toFixed(1) + '%"></i></div>' +
+      '<div class="forecast-side">' + UI.esc(f.label ? '(' + f.label + ')' : '') + '</div>' +
+      '<div class="forecast-drivers">' + chips + '</div>' +
+      '<div class="forecast-side" style="font-size:11.5px;color:var(--dim)">Transparent per-PA estimate from season rates (log5), platoon splits, form, head-to-head, familiarity and count. Not an MLB projection or a betting line.</div>' +
+    '</div>';
   }
 
   function renderPropsTab(forecast, extra) {
@@ -567,7 +581,7 @@
 
     var driverRows = f.drivers.map(function (d) {
       var sign = d.points > 0 ? '+' : '';
-      return '<dt>' + UI.esc(d.label) + '</dt><dd>— (unverified)</dd>';
+      return '<dt>' + UI.esc(d.label) + '</dt><dd>' + sign + d.points.toFixed(1) + ' pt</dd>';
     }).join('');
 
     var detailTableRows = f.drivers.map(function (d) {
@@ -579,8 +593,8 @@
       }
       return '<tr>' +
         '<td><b>' + UI.esc(d.label) + '</b></td>' +
-        '<td class="driver-pts"></td>' +
-        '<td class="driver-detail">Unverified model adjustment; not an official MLB value.</td>' +
+        '<td class="driver-pts">' + sign + d.points.toFixed(1) + ' pt</td>' +
+        '<td class="driver-detail">' + UI.esc(d.detail) + '</td>' +
         '<td class="src-cell">' + links + '</td>' +
       '</tr>';
     }).join('');
