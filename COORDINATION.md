@@ -156,3 +156,14 @@ No other claims existed when this session began. Other sessions must request ove
 - Official upcoming source: https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-04-01
 - Published irregularities: https://kanlerxz87-cyber.github.io/Alert5/flagged.html#alert5-verification
 - Verification boundaries: [docs/alert5-copy-verification.md](docs/alert5-copy-verification.md). Copy/integration is complete; exhaustive re-verification of inherited historical claims is explicitly not claimed.
+
+
+---
+
+## Duplicate full-copy PR reconciliation — session `07f0c355` (2026-11-25)
+
+Session `07f0c355` (fixed branch `arena/07f0c355-alert5`) independently copied the same upstream pinned commit (`snapquast73-boop/LIVPBP` @ `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`) and opened PR #5 before discovering that merged integration had landed on `main` (PR #1, then PR #4/#6). To avoid overwriting integrated verification fixes, this session merged current `origin/main` into the fixed branch and resolved every overlapping file by adopting `main` verbatim: application code, workflows, flagged page, README, package scripts, manifest and audit records. This branch's duplicate `docs/copy-verification-2026-11-25.md` and `docs/upstream-COORDINATION-2026-11-25.md` were dropped in favor of `main`'s `audit/upstream-manifest.json`, `audit/upstream-coordination.md` and `docs/alert5-copy-verification.md`. Before this note was added, `git diff --name-status origin/main` was empty.
+
+No other session's files were overwritten; open parallel duplicate PRs (including #2, #3, #7, #8) were not modified. Historical full-copy PRs should not be merged over the integrated fixes; follow-up work should start from `main` and claim only non-overlapping scopes.
+
+Verification of the reconciled tree on 2026-11-25: `npm ci` (0 vulnerabilities) and `npm run test:all` — syntax OK · 52 local references OK · 8 contract bindings OK · 49/49 jsdom checks · 5/5 props provenance checks · `tools/restoration-check.mjs` ALL CHECKS PASSED · `tools/smoke-test.mjs` 64 passed. GitHub Pages publication and delivery verification for the real app remain those recorded for merged PR #1/#6: Pages deployment https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698540733 and published-delivery verification https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698641768. The live replay feed was fetched on 2026-11-25 and rendered populated official MLB-derived entries with per-row `statsapi.mlb.com` links; counts are dynamic. Official upcoming-slate evidence remains the 2027-04-01 MLB schedule recorded by the integrating sessions.
