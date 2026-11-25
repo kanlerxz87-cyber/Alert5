@@ -21,12 +21,13 @@ this session will not touch).
 | T3 Make the copied site site-specific for `kanlerxz87-cyber/Alert5` | done | `07f0c355` | `404.html`, `README.md`, `package.json`, page-relative project-path handling | No change to MLB data semantics; relative assets kept; `package.json` homepage → `https://kanlerxz87-cyber.github.io/Alert5/`; `404.html` base path → `/Alert5/`; README fork notice/live-demo link updated. |
 | T4 Publish a copy/verification addendum and flagged items | done | `07f0c355` | `flagged.html`, `docs/copy-verification-2026-11-25.md`, `docs/upstream-COORDINATION-2026-11-25.md` (preserved upstream board) | Unverifiable/non-official values are left blank and flagged; `docs/copy-verification-2026-11-25.md`; upstream board preserved at `docs/upstream-COORDINATION-2026-11-25.md`; `flagged.html` §15 added; unverified items left blank. |
 | T5 Run the full local verification suite and local server smoke checks | done | `07f0c355` | `package.json`, `tests/`, `tools/` (no scope expansion unless a check fails) | `npm ci`, `npm test`, `node tests/run-all.mjs`, `node tools/restoration-check.mjs`, `npm ci`; `node tools/restoration-check.mjs` ALL PASSED; `npm test` 64/64; `node tests/run-all.mjs` 47/47 jsdom + 41 refs + 8 bindings; `props-provenance` 5/5; `link-check` 46 refs OK; local server: all pages/assets 200, `/.git/HEAD` 403, `/api/health` OK. |
-| T6 Pull request into `main`, merge, confirm GitHub Pages build/deploy, record result | in progress | `07f0c355` | `COORDINATION.md` only for the final record | PR from this fixed branch into `main`; do not wait for approval after checks pass. |
+| T6 Pull request into `main`, merge, confirm GitHub Pages build/deploy, record result | in progress | `07f0c355` | `COORDINATION.md` (pre-merge record here; post-merge Pages record follows in this PR branch/follow-up) | PR [#5](https://github.com/kanlerxz87-cyber/Alert5/pull/5) opened from this branch to `main`; pre-merge checks all green; no approval wait. Merge result + Pages confirmation are recorded after the merge runs. |
 
 ## Copy record (2026-11-25)
 
 - Source copied: [`snapquast73-boop/LIVPBP` @ `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`](https://github.com/snapquast73-boop/LIVPBP/commit/5c02527d3c7a56ea66c698cfabff80a407b6dfd3) — fresh clone HEAD matched `git ls-remote origin HEAD` before copying.
-- Commits: `2a320bb` claim board · `c31924f` copy of upstream tree · this commit: site-specific + verification/flagged records.
+- Commits: `2a320bb` claim board · `c31924f` copy of upstream tree · `1da58a7` site-specific + verification/flagged records · this commit: PR #5 record.
+- Integration PR: [#5](https://github.com/kanlerxz87-cyber/Alert5/pull/5) (`arena/07f0c355-alert5` → `main`).
 - Post-copy diff vs source (excluding `.git`, `node_modules`): `404.html` (project-site base path), `README.md` (fork notice + live demo), `package.json` (homepage), root `COORDINATION.md` (this board), added `docs/upstream-COORDINATION-2026-11-25.md`, `docs/copy-verification-2026-11-25.md`. No application/MLB parsing logic changed.
 - Upstream license preserved: `LICENSE` (MIT, `Copyright (c) 2026 MLB-Live-PBP contributors`).
 
