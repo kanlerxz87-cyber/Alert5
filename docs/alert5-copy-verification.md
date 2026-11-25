@@ -17,7 +17,7 @@ The source repository is authoritative for the copied software, **not** authorit
 ## Checks and boundaries
 
 - `npm ci`: installed locked development dependencies, zero reported npm vulnerabilities at installation time.
-- `npm run test:all`: syntax, relative local references, DOM contracts, 47 fixture render assertions, five props provenance checks, server round-trip/static access tests, and 64 smoke assertions.
+- `npm run test:all`: syntax, relative local references, DOM contracts, 49 fixture/render assertions (including nested Alert5 404 paths), five props provenance checks, server round-trip/static access tests, and 64 smoke assertions.
 - Runtime data-table source cells are retained in linescore, boxscore and props tables; replay entries link to official play-by-play. Source links identify input data, not an official endorsement of locally computed probabilities.
 - Unofficial model percentages, tiers and point adjustments are withheld from presentation and marked unverified. Underlying upstream model code remains for provenance, but is not a verified MLB forecast.
 - `npm run test:official`: added live-network integration check. Fetches the upcoming April 1 slate directly from MLB (next calendar year by default), logs every returned matchup with its official source, and renders the real scoreboard and replay-feed scripts at the Alert5 project prefix with actual official responses. No synthetic payload fallback. Runs in GitHub Actions because direct StatsAPI access from the Arena shell is blocked. Logs and check conclusion, rather than fixture tests, establish this check's result.
@@ -26,3 +26,7 @@ The source repository is authoritative for the copied software, **not** authorit
 - GitHub Pages is static: server-side cross-browser persistence requires separately hosting the included optional server. The copied Pages behavior uses localStorage.
 
 All these limitations are also published on [Flagged for Review](../flagged.html#alert5-verification). No inherited factual assertion is promoted to freshly verified merely because a deterministic test passes.
+
+## Live CI result
+
+[Site checks run 45698128503](https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698128503) passed both the full test suite and official upcoming-slate rendering. A subsequent delivery check is intentionally performed after publication, not against the pre-copy site during PR review.
