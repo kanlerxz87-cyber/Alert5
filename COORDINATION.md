@@ -78,10 +78,16 @@ therefore about **confirming the API field contract** (below) rather than fillin
 | 2026-11-25 | The copy is byte-identical to reference repo `LIVPBP` @ `5c02527` | local `diff -r` against `git clone https://github.com/snapquast73-boop/LIVPBP` | Identical, no differences |
 | 2026-11-25 | Reference site responds and renders the 2026-08-26 replay feed | <https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26> | Rendered 15 games / 76 tracked entries, 3 review rows |
 | 2026-11-25 | `2026-08-26` slate shape used by the feed (`dates[].games[]`, `gamePk`, `status.codedGameState`, `teams.{away,home}.score`) | <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26> | Confirmed: 15 games, all `Final`; `CIN 10 – SF 9` (gamePk 823180), `PHI 6 – SEA 0` (gamePk 823096) match the reference feed rows exactly |
+| 2026-11-25 | Review-type codes `MF` = "Manager challenge: Close play at 1st", `MA` = "Manager challenge: Tag play", `IH` = "Instant Replay" | <https://statsapi.mlb.com/api/v1/gameStatus> | Confirmed verbatim — exactly the codes the 2026-08-26 review rows use |
+| 2026-11-25 | PHI @ SEA review row is official (at-bat index 36 of game `823096`) | <https://statsapi.mlb.com/api/v1/game/823096/playByPlay> | Confirmed — description matches the reference row word for word |
+| 2026-11-25 | Challenge counters read as-is from `review.away/home.used/remaining` | <https://statsapi.mlb.com/api/v1.1/game/823096/feed/live> | Confirmed — `home {used:1, remaining:0}` = the "SEA: 0 manager challenges left now (1 used)" row; `absChallenges` present with `usedSuccessful/usedFailed/remaining` |
+| 2026-11-25 | Offseason: no games on 2026-11-25; last 2026 game date is 2026-10-28 | <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-11-25> · `startDate=2026-09-20&endDate=2026-11-25` | `{"totalGames":0,"dates":[]}`; the range lists `2026-10-28` (1 game) last — matches the upstream §11 record (game 849799) |
 | 2026-11-25 | `npm test` (64-check smoke suite: review parsers, ABS counters, runs-at-risk, scoring changes, `?date=` deep links, empty state) | `node tools/smoke-test.mjs` | **64 passed, 0 failed** |
-| 2026-11-25 | Render of all three pages against stubbed official payloads | `node tests/jsdom-render-test.mjs` | see log |
-| 2026-11-25 | Static link integrity (no missing asset, no breaking absolute path, no dead local link) | `node tests/link-check.mjs` | see log |
-| 2026-11-25 | Local server serves every page and the feed-log round-trips | `node server.mjs` + `curl` | see log |
+| 2026-11-25 | Render of all three pages against stubbed official payloads | `node tests/jsdom-render-test.mjs` (via `tests/run-all.mjs`) | 47/47 checks passed |
+| 2026-11-25 | Every script parses; static link integrity (no missing asset, no breaking absolute path, no dead local link); page name/id bindings | `node tests/run-all.mjs` | scripts OK · 42 local refs OK · 8 bindings OK · 47/47 jsdom |
+| 2026-11-25 | Every page + every asset serves with HTTP 200 from the local server | `node server.mjs` on :8101 + `curl` | **15/15 routes 200** (`/`, `index.html`, `reviews.html`, `game.html?gamePk=823096`, `flagged.html`, `404.html`, 9 assets) |
+| 2026-11-25 | Feed-log persistence round-trip, SSE live push, input validation | `node server.mjs` on :8102 + `curl` | `/api/health` ok · POST→GET returns the entry verbatim · `/api/feed-log/stream` emits `event: connected` + `event: feed-log` · invalid date → **400** · path traversal → **404** · malformed `%` escape → **400, process survives** |
+| 2026-11-25 | Upstream's open defect **A6** (uncaught `decodeURIComponent` crash + sibling-dir containment) | `curl 'http://127.0.0.1:8102/%E0%A4%A'` against this copy | **Fixed in the copy** — 400 response, server keeps running (upstream §2 still lists A6 as open) |
 
 ---
 
