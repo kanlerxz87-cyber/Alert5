@@ -1,8 +1,8 @@
 {
-  "name": "mlb-live-pbp",
+  "name": "alert5",
   "version": "1.0.0",
   "private": true,
-  "description": "MLB Live PBP \u2014 live MLB scoreboard, play-by-play and replay-review feed (static site, GitHub Pages).",
+  "description": "MLB Live PBP — live MLB scoreboard, play-by-play and replay-review feed (static site, GitHub Pages).",
   "homepage": "https://kanlerxz87-cyber.github.io/Alert5/",
   "license": "MIT",
   "type": "module",

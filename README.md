@@ -187,7 +187,7 @@ mlb.com uses, re-implemented from scratch in vanilla HTML/CSS/JS.
 - No build step, no frameworks, no API keys — it runs on **GitHub Pages** (or any static
   host, or even `file://`).
 
-> **Live demo:** [snapquast73-boop.github.io/LIVPBP](https://snapquast73-boop.github.io/LIVPBP/)
+> **Live demo:** [kanlerxz87-cyber.github.io/Alert5](https://kanlerxz87-cyber.github.io/Alert5/)
 > (Restored 2026-11-20: the original author's repo linked here previously is
 > no longer on GitHub — see `flagged.html` items F-002/F-008 and
 > `COORDINATION.md` for the restoration log and flagged irregularities.)
