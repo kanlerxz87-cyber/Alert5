@@ -25,6 +25,7 @@ results.push(run('syntax: assets/js/*.js', 'bash', ['-lc', 'set -e; for f in ass
 results.push(run('link-check', process.execPath, [path.join(HERE, 'link-check.mjs')]));
 results.push(run('contract-check', process.execPath, [path.join(HERE, 'contract-check.mjs')]));
 results.push(run('jsdom-render-test', process.execPath, [path.join(HERE, 'jsdom-render-test.mjs')]));
+results.push(run('preview-day-render-test', process.execPath, [path.join(HERE, 'preview-day-render-test.mjs')]));
 
 // Report, and ignore a SKIPPED jsdom run (exit 0 with a SKIPPED line).
 console.log('\n========== summary ==========');
@@ -34,6 +35,6 @@ for (const r of results) {
   if (!r.ok) failed += 1;
 }
 const fixtures = readdirSync(path.join(HERE, 'fixtures')).length;
-console.log(`fixtures used: ${fixtures} (values copied verbatim from official StatsAPI responses, 2026-11-20)`);
+console.log(`fixtures used: ${fixtures} (values copied verbatim from official StatsAPI responses; provenance in each fixture)`);
 console.log(`docs: docs/verification-report.md · flagged items: flagged.html · board: COORDINATION.md`);
 process.exit(failed ? 1 : 0);
