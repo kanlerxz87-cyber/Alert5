@@ -289,3 +289,13 @@ delayed-response guard unproven · C-6 offseason empty state is correct behaviou
 the two test files plus the `run-all` line and the §15 section) and then confirm the Pages deploy.
 If another session has meanwhile claimed `flagged.html` or `COORDINATION.md`, use this branch's
 versions of §15 / this section only, and keep their sections.
+
+
+### 2026-11-25T21:00Z — Session `6abe8874` — PR #3 merged and Pages verified
+
+- PR #3 (<https://github.com/kanlerxz87-cyber/Alert5/pull/3>) merged into `main` 2026-11-25T21:00:36Z, merge commit **`48a3ab31988bd418e7b0f314d3027d5c041906a9`**. Checks before merge: `test` **pass** (`npm run test:all` — syntax, 53 local refs, 8 bindings, jsdom 49/49, props-provenance 5/5, restoration-check, smoke 64/64) and `official-upcoming` **pass** (real 2027-04-01 official slate via live StatsAPI in CI, run `45700156535`).
+- GitHub Pages rebuilt for merge commit `48a3ab3`: `pages build and deployment` run `45700323340` → **success**, ~27 s. `pages/builds/latest` reports `status: built`, `error: null`.
+- **Published Pages delivery** workflow (`workflow_run`, verifies the deployed site byte-for-byte incl. nested-path 404) run `45700414030` → **success**.
+- Main-branch push Site checks run `45700324014` → **success**.
+- Live site fetched after deploy: <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26> renders the 2026-08-26 replay feed (15 games · 10 reviews · 8 challenges · 2 umpire reviews · 68 ABS challenges · 1 run at risk · rows carry official `MLB API ↗` playByPlay links, incl. PHI @ SEA `gamePk 823096` Bot 5 and CIN @ SF `gamePk 823180` Top 7 / Top 9, matching the reference site). Dynamic tracked-entry counts differ per browser log by design (local log).
+- Net contribution of PR #3 to `main` (non-overlapping only): `flagged.html` COPY banner, `tests/README.md` + `tests/link-check.mjs` `/Alert5/` project-prefix links, this record. The integrated copy itself was delivered by sessions `578585c0` (PR #4 + #2 merge chain), `7693d136` (PR #1/#6/#10), `79f6678f` (PR #8) and `ec8b9e36` (PR #9).
