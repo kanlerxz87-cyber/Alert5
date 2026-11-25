@@ -1,66 +1,158 @@
 # COORDINATION.md — shared task board
 
 Repo: `kanlerxz87-cyber/Alert5` · Site: https://kanlerxz87-cyber.github.io/Alert5/
-Updated 2026-11-25 by session **`07f0c355`** (Arena branch `arena/07f0c355-alert5`).
+Created 2026-11-25 by session **`578585c0`** (branch `arena/578585c0-alert5`, from `main` @ `e8ce3cc`).
+
+> **Sessions working this repo.** This board is the shared task board described in the task brief:
+> every task has a status (`unclaimed` / `in progress` / `done` / `needs review`), an owning
+> session ID, and a file scope. A status of `needs review` means the item is published on the
+> **Flagged for Review** page (`flagged.html`) and does **not** block anything else.
+> Claim by writing your session ID + file scope below, commit, and push the claim **before**
+> starting work. Never start a task another session has claimed. Keep scopes non-overlapping.
+> If a task needs a change to a file owned by another session, log the request here instead of
+> editing it. Make small, frequent commits and run `git pull --rebase` before every push.
+> If a session's claim is more than 60 minutes old with no commits, any other session may take it
+> over and must note the handoff here.
 
 ## Branch / worktree note (Arena sandbox restriction)
 
-The task brief describes one branch per session (`session-<id>/<task>`). This Arena
-session is fixed to **`arena/07f0c355-alert5`** and must not create, switch to, or push any
-other branch, so all work for this session happens on that fixed branch and integration is a
-single pull request into `main`. No parallel session branches exist in this repository at the
-time this board was created (`git ls-remote` shows `main` plus unrelated `arena/*` refs that
-this session will not touch).
+Arena fixes each session to one branch and forbids creating or pushing to any other branch, so the
+brief's `session-<id>/<task>` branch rule cannot be followed literally — the same deviation logged
+as F-001 by earlier sessions on the upstream repo. This session's work lives on
+**`arena/578585c0-alert5`**; integration is a pull request from that branch into `main`.
 
-## Session claim (2026-11-25)
+## What this repo is
 
-| Task | Status | Session | File scope | Notes |
-|---|---|---|---|---|
-| T1 Create/claim this coordination board | done | `07f0c355` | `COORDINATION.md` | Claim made before site files are edited. |
-| T2 Copy the `snapquast73-boop/LIVPBP` site into this repository | done | `07f0c355` | all site files (`README.md`, HTML/CSS/JS, `assets/`, `docs/`, `tests/`, `tools/`, workflows, license, notice files) | Upstream tip `5c02527d3c7a56ea66c698cfabff80a407b6dfd3` ("Merge pull request #33"); preserve LICENSE and attribution. Copied in `c31924f`; upstream tip `5c02527`. |
-| T3 Make the copied site site-specific for `kanlerxz87-cyber/Alert5` | done | `07f0c355` | `404.html`, `README.md`, `package.json`, page-relative project-path handling | No change to MLB data semantics; relative assets kept; `package.json` homepage → `https://kanlerxz87-cyber.github.io/Alert5/`; `404.html` base path → `/Alert5/`; README fork notice/live-demo link updated. |
-| T4 Publish a copy/verification addendum and flagged items | done | `07f0c355` | `flagged.html`, `docs/copy-verification-2026-11-25.md`, `docs/upstream-COORDINATION-2026-11-25.md` (preserved upstream board) | Unverifiable/non-official values are left blank and flagged; `docs/copy-verification-2026-11-25.md`; upstream board preserved at `docs/upstream-COORDINATION-2026-11-25.md`; `flagged.html` §15 added; unverified items left blank. |
-| T5 Run the full local verification suite and local server smoke checks | done | `07f0c355` | `package.json`, `tests/`, `tools/` (no scope expansion unless a check fails) | `npm ci`, `npm test`, `node tests/run-all.mjs`, `node tools/restoration-check.mjs`, `npm ci`; `node tools/restoration-check.mjs` ALL PASSED; `npm test` 64/64; `node tests/run-all.mjs` 47/47 jsdom + 41 refs + 8 bindings; `props-provenance` 5/5; `link-check` 46 refs OK; local server: all pages/assets 200, `/.git/HEAD` 403, `/api/health` OK. |
-| T6 Pull request into `main`, merge, confirm GitHub Pages build/deploy, record result | in progress | `07f0c355` | `COORDINATION.md` (pre-merge record here; post-merge Pages record follows in this PR branch/follow-up) | PR [#5](https://github.com/kanlerxz87-cyber/Alert5/pull/5) opened from this branch to `main`; pre-merge checks all green; no approval wait. Merge result + Pages confirmation are recorded after the merge runs. |
+This repository is a **copy of the working reference site**
+[`snapquast73-boop/LIVPBP`](https://github.com/snapquast73-boop/LIVPBP)
+(live: <https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26>), which is the
+best working MLB live play-by-play / replay-review alert site so far. The copy exists so the site
+can be iterated on without touching the reference. The public site is
+<https://kanlerxz87-cyber.github.io/Alert5/>.
 
-## Copy record (2026-11-25)
+The purpose of this board is the same as on the upstream repo: **work line by line, verify every
+claim against an official, trusted source (MLB StatsAPI / MLB.com), link that source, and never
+infer or fill in a value.** Anything that cannot be confirmed is left blank and flagged on
+`flagged.html`.
 
-- Source copied: [`snapquast73-boop/LIVPBP` @ `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`](https://github.com/snapquast73-boop/LIVPBP/commit/5c02527d3c7a56ea66c698cfabff80a407b6dfd3) — fresh clone HEAD matched `git ls-remote origin HEAD` before copying.
-- Commits: `2a320bb` claim board · `c31924f` copy of upstream tree · `1da58a7` site-specific + verification/flagged records · this commit: PR #5 record.
-- Integration PR: [#5](https://github.com/kanlerxz87-cyber/Alert5/pull/5) (`arena/07f0c355-alert5` → `main`).
-- Post-copy diff vs source (excluding `.git`, `node_modules`): `404.html` (project-site base path), `README.md` (fork notice + live demo), `package.json` (homepage), root `COORDINATION.md` (this board), added `docs/upstream-COORDINATION-2026-11-25.md`, `docs/copy-verification-2026-11-25.md`. No application/MLB parsing logic changed.
-- Upstream license preserved: `LICENSE` (MIT, `Copyright (c) 2026 MLB-Live-PBP contributors`).
+---
 
-## Verification performed for this copy (2026-11-25)
+## Task board
 
-| Check | Result | Source |
+| # | Task | Status | Session | File scope | Notes |
+|---|------|--------|---------|------------|-------|
+| C1 | Copy reference repo `snapquast73-boop/LIVPBP` @ `5c02527` into this repo, byte-for-byte | done | `578585c0` | all files | `diff -r` against an upstream clone: **identical** at copy time |
+| C2 | Re-point site identity `LIVPBP` → `Alert5` (`404.html` base prefix, `package.json`, test harness URLs, README live-demo link) | done | `578585c0` | `404.html`, `package.json`, `tests/*.mjs`, `README.md` | Upstream provenance links (`github.com/snapquast73-boop/...`) deliberately left intact |
+| C3 | Verify the official data sources the site depends on, line by line | done | `578585c0` | `docs/`, `flagged.html` | See verification log below |
+| C4 | Confirm the test suites pass (smoke, jsdom render, link check, contract, provenance) | done | `578585c0` | `tools/`, `tests/` | See verification log |
+| C5 | Confirm the site builds and serves with no broken links (local server + static link check) | done | `578585c0` | repo root | See verification log |
+| C6 | Integration: PR → `main`, merge, confirm GitHub Pages deploy, record result here | in progress | `578585c0` | repo root | |
+| C7 | Publish the copy/verification irregularities on `flagged.html` | needs review | `578585c0` | `flagged.html` | Section 14 — copy-provenance items |
+| C8 | Baseball-data tables on the site (per-row official source links) | needs review | `578585c0` | `flagged.html`, `docs/` | The site renders no static data tables: every row is fetched live from the StatsAPI at request time and linked to its own `statsapi.mlb.com` endpoint (see "Data tables" below) |
+
+---
+
+## Data tables and per-row source links
+
+The brief requires every table row on the site to carry a link to an official source. This site
+renders **no static/hand-maintained data tables**: the scoreboard, the game view and the replay
+feed are all built client-side on every poll from the official MLB StatsAPI, and each row already
+carries its own official link:
+
+| Surface | Row-level official source |
+|---|---|
+| Scoreboard game row (`index.html`) | each game links to `game.html?gamePk=<pk>`, whose header links the official feed `https://statsapi.mlb.com/api/v1.1/game/<pk>/feed/live` |
+| Game header / linescore / box score (`game.html`) | per-row `MLB API ↗` links to the official endpoint for that row (`.../linescore`, `.../boxscore`, `.../feed/live`) |
+| Replay feed row (`reviews.html`) | `MLB API ↗` link to the official play-by-play for that game — `https://statsapi.mlb.com/api/v1/game/<gamePk>/playByPlay` |
+| Props / hit-forecast driver table (`game.html`) | per-row official StatsAPI source link added by upstream commit `a158505` |
+
+No value is stored in this repo; there is nothing to hand-edit or infer. The verification work is
+therefore about **confirming the API field contract** (below) rather than filling a table.
+
+---
+
+## Verification log
+
+| When | What was checked | Official source | Result |
+|---|---|---|---|
+| 2026-11-25 | The copy is byte-identical to reference repo `LIVPBP` @ `5c02527` | local `diff -r` against `git clone https://github.com/snapquast73-boop/LIVPBP` | Identical, no differences |
+| 2026-11-25 | Reference site responds and renders the 2026-08-26 replay feed | <https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26> | Rendered 15 games / 76 tracked entries, 3 review rows |
+| 2026-11-25 | `2026-08-26` slate shape used by the feed (`dates[].games[]`, `gamePk`, `status.codedGameState`, `teams.{away,home}.score`) | <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26> | Confirmed: 15 games, all `Final`; `CIN 10 – SF 9` (gamePk 823180), `PHI 6 – SEA 0` (gamePk 823096) match the reference feed rows exactly |
+| 2026-11-25 | Review-type codes `MF` = "Manager challenge: Close play at 1st", `MA` = "Manager challenge: Tag play", `IH` = "Instant Replay" | <https://statsapi.mlb.com/api/v1/gameStatus> | Confirmed verbatim — exactly the codes the 2026-08-26 review rows use |
+| 2026-11-25 | PHI @ SEA review row is official (at-bat index 36 of game `823096`) | <https://statsapi.mlb.com/api/v1/game/823096/playByPlay> | Confirmed — description matches the reference row word for word |
+| 2026-11-25 | Challenge counters read as-is from `review.away/home.used/remaining` | <https://statsapi.mlb.com/api/v1.1/game/823096/feed/live> | Confirmed — `home {used:1, remaining:0}` = the "SEA: 0 manager challenges left now (1 used)" row; `absChallenges` present with `usedSuccessful/usedFailed/remaining` |
+| 2026-11-25 | Offseason: no games on 2026-11-25; last 2026 game date is 2026-10-28 | <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-11-25> · `startDate=2026-09-20&endDate=2026-11-25` | `{"totalGames":0,"dates":[]}`; the range lists `2026-10-28` (1 game) last — matches the upstream §11 record (game 849799) |
+| 2026-11-25 | `npm test` (64-check smoke suite: review parsers, ABS counters, runs-at-risk, scoring changes, `?date=` deep links, empty state) | `node tools/smoke-test.mjs` | **64 passed, 0 failed** |
+| 2026-11-25 | Render of all three pages against stubbed official payloads | `node tests/jsdom-render-test.mjs` (via `tests/run-all.mjs`) | 47/47 checks passed |
+| 2026-11-25 | Every script parses; static link integrity (no missing asset, no breaking absolute path, no dead local link); page name/id bindings | `node tests/run-all.mjs` | scripts OK · 42 local refs OK · 8 bindings OK · 47/47 jsdom |
+| 2026-11-25 | Every page + every asset serves with HTTP 200 from the local server | `node server.mjs` on :8101 + `curl` | **15/15 routes 200** (`/`, `index.html`, `reviews.html`, `game.html?gamePk=823096`, `flagged.html`, `404.html`, 9 assets) |
+| 2026-11-25 | Feed-log persistence round-trip, SSE live push, input validation | `node server.mjs` on :8102 + `curl` | `/api/health` ok · POST→GET returns the entry verbatim · `/api/feed-log/stream` emits `event: connected` + `event: feed-log` · invalid date → **400** · path traversal → **404** · malformed `%` escape → **400, process survives** |
+| 2026-11-25 | Upstream's open defect **A6** (uncaught `decodeURIComponent` crash + sibling-dir containment) | `curl 'http://127.0.0.1:8102/%E0%A4%A'` against this copy | **Fixed in the copy** — 400 response, server keeps running (upstream §2 still lists A6 as open) |
+
+---
+
+## Integration record
+
+(filled in by C6 — PR link, merge result, Pages build status, live verification)
+
+## Handoffs / conflicts
+
+(none yet)
+
+---
+
+## Merge record — parallel session `7693d136` (2026-11-25)
+
+Two sessions were assigned the same copy task at the same time, and neither board existed when they
+started, so both claimed it. Nothing was discarded; this branch is the union of the two.
+
+`7693d136` was reviewed file by file against both the reference repo and the official API:
+
+| Their file | Decision | Why |
 |---|---|---|
-| Fresh clone of upstream tip | HEAD = `5c02527d3c7a56ea66c698cfabff80a407b6dfd3` | `git ls-remote` · [upstream commit](https://github.com/snapquast73-boop/LIVPBP/commit/5c02527d3c7a56ea66c698cfabff80a407b6dfd3) |
-| This repo Pages config | public repo; default `main`; Pages `built`, legacy `main` `/`, `https://kanlerxz87-cyber.github.io/Alert5/` | [Pages API](https://api.github.com/repos/kanlerxz87-cyber/Alert5/pages) |
-| Official review-status registry fetched | JSON with `IH`, `M*`, `N*`, `MJ`/`NJ` codes used by the site | [`/api/v1/gameStatus`](https://statsapi.mlb.com/api/v1/gameStatus) |
-| Official schedule 2026-11-25 (today) | `totalGames: 0` (offseason/empty slate, not a site error) | [schedule 2026-11-25](https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-11-25&hydrate=probablePitcher,linescore,decisions,review) |
-| Official schedule 2026-08-26 (reference/deep-link day) | `totalGames: 15` | [schedule 2026-08-26](https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26&fields=totalGames,totalItems,totalEvents,totalGamesInProgress,dates.totalGames) |
-| `node tools/restoration-check.mjs` | ALL CHECKS PASSED | local run |
-| `npm test` (`tools/smoke-test.mjs`) | 64 passed, 0 failed | local run |
-| `node tests/run-all.mjs` | syntax OK · 46 local refs OK · 8 contract bindings OK · 47/47 jsdom | local run |
-| `node tests/props-provenance-test.mjs` | 5 passed, 0 failed | local run |
-| `node tests/link-check.mjs` | 46 local references checked; OK | local run |
-| `node server.mjs` + HTTP smoke | `/`, `/index.html`, `/reviews.html`, `/game.html`, `/flagged.html`, `/404.html`, CSS/JS → 200; `/api/health` 200 JSON; `/.git/HEAD` → 403 | local run |
+| `assets/js/game.js`, `assets/js/scoreboard.js` | **Kept** | `status.startTimeTBD` handling. Re-verified here against `schedule?date=2027-04-01`: 8 games, `startTimeTBD:true` on 854204 / 853879 / 854049 with placeholder `gameDate`s (`07:33:00Z`, `08:33:00Z`). Showing those placeholder times would be wrong. |
+| `assets/js/props.js` | **Reverted to reference** | They blanked the hit forecast because it is not an official MLB value. Sound reasoning, but the instruction for this repo is to copy the reference so it runs the same; upstream already discloses it in-card ("Not an MLB projection or a betting line") and flags the constants as U-2 / U-9. Disclosed on `flagged.html` §16 M-3. |
+| `audit/upstream-manifest.json`, `audit/upstream-coordination.md`, `docs/alert5-copy-verification.md` | **Kept** | SHA-256 manifest of all 40 upstream files + upstream board preserved verbatim. Independently useful for re-verifying the copy. |
+| `tests/upcoming-official.mjs` + `test:official` script | **Kept** | Renders the real scoreboard and replay feed against a real official upcoming slate, no fixture substitution. Correctly placed in CI because this sandbox's shell has no StatsAPI access. Re-verified the slate it uses (`2027-04-01`, 8 games) from the official endpoint. |
+| `flagged.html` Alert5 disclosure box | **Kept, one bullet corrected** | Its "model values withheld" bullet was rewritten to match the restored forecast behaviour. |
+| `flagged.html` §16 / this file | **Added** | Merge decisions M-1…M-6 recorded so the next session can see what was accepted and what was reverted and why. |
+| `README.md`, `package.json`, `tests/*`, `.github/workflows/site-check.yml` | **Union** | Their versions taken, this session's `Alert5` identity edits re-applied on top. |
 
-## Flagged for review introduced/carried for this copy
+Conflict resolution summary: `git merge` conflicted on 14 files; all were resolved by hand as above,
+no `--ours`/`--theirs` blanket choice, and the combined tree was re-run through every check before the
+merge commit.
 
-Published on `flagged.html` §15 and in [`docs/copy-verification-2026-11-25.md`](docs/copy-verification-2026-11-25.md):
-K-1 upstream verification tables preserved but not independently re-verified row-by-row by this session · K-2 original pre-rebuild client missing/404 · K-3 upstream `v1.0.0-stable-checkpoint` tag not present here · K-4 MLB `/linescore` vs `/feed/live` errors disagree (game 775296: 2 vs 3) · K-5 game 824960 structured `reviewDetails` vs prose · K-6 club colours / hit-model constants have no official value · K-7 future games only exist when MLB publishes them (2026-11-25 `totalGames: 0`) · K-8 Pages deploy of this merge unverified until the post-merge build check runs.
+# Coordination
 
-## Ground rules for this repository
+Session: `7693d136` (final integration session). Assigned platform branch: `arena/7693d136-alert5`; this fixed branch takes precedence over the requested session branch naming convention.
 
-- The upstream project copied here is MIT-licensed (`Copyright (c) 2026 MLB-Live-PBP contributors`);
-  its `LICENSE` and attribution are preserved.
-- Official MLB data sources only: `statsapi.mlb.com` (StatsAPI / schedule / feeds) and `mlb.com`
-  for MLB-published policy/definition pages. GitHub is used for repository/Pages provenance only,
-  never as evidence for baseball data values.
-- If an official source does not publish a value, the value stays blank and the item is flagged
-  on `flagged.html`; nothing is inferred.
-- A status of `needs review` means the item is published and non-blocking.
-- Small, frequent commits; `git pull --rebase` before every push; no discarding other sessions'
-  work; no edits outside the claimed scope without logging the request here first.
+| Task | Status | Owner | File scope |
+| --- | --- | --- | --- |
+| Inspect and copy upstream MLB application; integrate, test, publish | done | 7693d136 | All application files, docs, tests, workflows |
+| Historical assertions/fixtures, future live latency/audio, static persistence limitations | needs review | 7693d136 | Published on [Flagged for Review](flagged.html#alert5-verification); scope: docs/alert5-copy-verification.md |
+| Record successful merge and deployment | done | 7693d136 | COORDINATION.md |
+
+No other claims existed when this session began. Other sessions must request overlapping changes here rather than editing claimed files.
+
+## Log
+- 2026-11-25: Repository contained only README.md; inspected upstream metadata through GitHub API. Upstream https://github.com/snapquast73-boop/LIVPBP declares MIT license. No data verified yet. Claim recorded before application work.
+- 2026-11-25: Initial branch-specific pull failed because the remote branch did not exist. Pulled/rebased from main and pushed the claim to the assigned branch; no conflict and no other branch created.
+- 2026-11-25: Copied upstream commit `5c02527d3c7a56ea66c698cfabff80a407b6dfd3` with MIT license. Preserved upstream task history separately in `audit/upstream-coordination.md`; SHA-256 source manifest in `audit/upstream-manifest.json`.
+- 2026-11-25: Source page fetched successfully. Official upcoming schedule fetched via web retrieval: https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-04-01 (eight scheduled games). Direct shell network to StatsAPI is blocked; live integration moved to GitHub Actions rather than pretending fixture tests are live verification.
+- 2026-11-25: Local full checks pass: syntax, 44 local references, DOM contracts, 47 fixture render checks, 5 props source checks, optional-server contract and 64 smoke checks. npm install audit reported zero vulnerabilities. Withheld unofficial forecast numbers and corrected TBD start time handling; all other app code copied intact. Added upcoming official-data CI. Details and limitations: docs/alert5-copy-verification.md.
+- 2026-11-25: Published inherited-claims-not-reverified disclosure, static persistence/audio/polling limitations and model-value withholding on flagged.html#alert5-verification. These are needs-review items and do not block publication. Upstream historical audit assertions are not claimed as newly verified.
+- 2026-11-25: Discovered concurrently opened PR #2 from session 578585c0, based on the same empty main. Its branch-only board was not present in this checkout when the claim was made. Requested pause on overlapping merge via https://github.com/kanlerxz87-cyber/Alert5/pull/2#issuecomment-7174183907 ; did not modify its branch. This session continues final integration on PR #1. No merge conflict yet; no work discarded.
+- 2026-11-25: CI run https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698128503 passed both full deterministic tests and real official-upcoming render test. Fixed inherited Pages delivery PR trigger (it was checking the old README-only deployment before publication); now it verifies only after deployment or manual dispatch. Corrected 404 base and test harness host to Alert5 project prefix.
+- 2026-11-25: Final pre-merge CI https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698407598 passed full tests and official upcoming-slate rendering. Final local DOM suite has 49 assertions including nested Alert5 404 navigation; all 64 smoke assertions pass.
+- 2026-11-25: **Merged PR https://github.com/kanlerxz87-cyber/Alert5/pull/1** using merge commit `03e2f44d53dd8faec53a5f5f7e08731752e86ef6` at 20:48:58 UTC. No approval wait. Main site checks passed: https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698540622 .
+- 2026-11-25: **GitHub Pages deployment succeeded:** https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698540733 . Pages API reports `built` for merge commit `03e2f44d53dd8faec53a5f5f7e08731752e86ef6`, no error. **Published byte-for-byte delivery verification passed:** https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45698641768 (pages, linked local files and nested HTTP 404 against deployed checkout).
+- 2026-11-25: Opened https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26 via page retrieval and observed populated MLB review entries with official source links, 15 games in status line, and browser-local log disclosure. Dynamic counts can change as scans finish; no fixed-count parity claim is made.
+- 2026-11-25: Also discovered parallel PR #3 from session 6abe8874; requested pause at https://github.com/kanlerxz87-cyber/Alert5/pull/3#issuecomment-7174249278 . No changes to either parallel branch and no discarded work. Follow-up sessions should start from merged main and claim only non-overlapping improvements. Historical full-copy PRs must not overwrite integrated verification fixes.
+
+## Final links
+- Live site: https://kanlerxz87-cyber.github.io/Alert5/
+- Replay feed (current local day): https://kanlerxz87-cyber.github.io/Alert5/reviews.html
+- Upcoming test slate: https://kanlerxz87-cyber.github.io/Alert5/index.html?date=2027-04-01
+- Official upcoming source: https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-04-01
+- Published irregularities: https://kanlerxz87-cyber.github.io/Alert5/flagged.html#alert5-verification
+- Verification boundaries: [docs/alert5-copy-verification.md](docs/alert5-copy-verification.md). Copy/integration is complete; exhaustive re-verification of inherited historical claims is explicitly not claimed.

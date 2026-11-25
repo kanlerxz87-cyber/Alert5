@@ -1,17 +1,27 @@
-# ⚾ MLB Live PBP — Live MLB Scoreboard & Play-by-Play
+# Alert5 — MLB live play-by-play and replay alerts
 
-> ### 📌 **COPY / FORK NOTICE (2026-11-25)** 📌
-> This repository (`kanlerxz87-cyber/Alert5`) is a copy of the MIT-licensed upstream project
-> [`snapquast73-boop/LIVPBP`](https://github.com/snapquast73-boop/LIVPBP) at commit
-> [`5c02527`](https://github.com/snapquast73-boop/LIVPBP/commit/5c02527d3c7a56ea66c698cfabff80a407b6dfd3)
-> ("Merge pull request #33"). The upstream `LICENSE` is preserved. The upstream coordination log is
-> preserved verbatim at [`docs/upstream-COORDINATION-2026-11-25.md`](docs/upstream-COORDINATION-2026-11-25.md);
-> this repository's active task board is [`COORDINATION.md`](COORDINATION.md), and the copy/verification addendum
-> for this repository is [`docs/copy-verification-2026-11-25.md`](docs/copy-verification-2026-11-25.md).
-> Historical verification logs and audit links in the retained upstream text describe the upstream rebuild;
-> the addendum flags what is and is not verified for this copy. The upstream `v1.0.0-stable-checkpoint` tag is
-> **not** present in this repository. The live site for this copy is
-> <https://kanlerxz87-cyber.github.io/Alert5/> (see the `reviews.html?date=YYYY-MM-DD` deep link for a game day).
+Copied from [snapquast73-boop/LIVPBP](https://github.com/snapquast73-boop/LIVPBP/tree/5c02527d3c7a56ea66c698cfabff80a407b6dfd3) (MIT), pinned at `5c02527d3c7a56ea66c698cfabff80a407b6dfd3`.
+
+- [Live scoreboard](https://kanlerxz87-cyber.github.io/Alert5/)
+- [Replay feed](https://kanlerxz87-cyber.github.io/Alert5/reviews.html) — defaults to the current local date, not a fixed historical day.
+- [Reference date](https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26)
+- [Upcoming slate](https://kanlerxz87-cyber.github.io/Alert5/index.html?date=2027-04-01)
+- [Flagged for Review](https://kanlerxz87-cyber.github.io/Alert5/flagged.html#alert5-verification)
+
+No build step or API key is required. GitHub Pages serves the files directly. Live data comes from MLB StatsAPI in the visitor’s browser. Keep a page open for polling alerts; browser audio may require a click. Pages uses browser-local persistence, not the optional server’s shared store.
+
+```sh
+npm ci
+npm run test:all
+npm run test:official # requires access to statsapi.mlb.com
+npm run serve        # optional local server, port 8000, binds 0.0.0.0
+```
+
+[Copy verification](docs/alert5-copy-verification.md) records the scope and limitations. Unofficial model probability/adjustment displays are withheld in this copy to honor the official-values-only requirement; TBD start times are respected. The remaining application behavior is preserved. The upstream documentation below is historical, not a fresh Alert5 verification. Its upstream URLs, dates and checkpoint tag refer to LIVPBP; that tag is not installed in this repository.
+
+---
+
+# ⚾ MLB Live PBP — Live MLB Scoreboard & Play-by-Play
 
 > ### ♻️ **RESTORATION NOTE (2026-11-20)** ♻️
 > This repository was uploaded incomplete: the three HTML pages referenced a stylesheet and nine
@@ -25,7 +35,7 @@
 > `node tests/jsdom-render-test.mjs` (field map: `docs/statsapi-field-map.md`). Known deviations from this README's description of the
 > original (refresh cadence, the reduced hit-forecast drivers, the simplified review score tracker,
 > and every unverified item) are published on the
-> **[⚑ Flagged for Review](flagged.html)** page, with source
+> **[⚑ Flagged for Review](https://snapquast73-boop.github.io/LIVPBP/flagged.html)** page, with source
 > links. The text below is the original project documentation, unchanged apart from this note, the
 > demo link, the file-tree entries that now exist, and the test commands in "Run it locally".
 
@@ -178,9 +188,9 @@ mlb.com uses, re-implemented from scratch in vanilla HTML/CSS/JS.
   host, or even `file://`).
 
 > **Live demo:** [kanlerxz87-cyber.github.io/Alert5](https://kanlerxz87-cyber.github.io/Alert5/)
-> (This copy was published from `kanlerxz87-cyber/Alert5`; the retained upstream text below points at
-> upstream commits and pages for historical verification evidence. See `flagged.html` and
-> [`docs/copy-verification-2026-11-25.md`](docs/copy-verification-2026-11-25.md) for this copy's review items.)
+> (Restored 2026-11-20: the original author's repo linked here previously is
+> no longer on GitHub — see `flagged.html` items F-002/F-008 and
+> `COORDINATION.md` for the restoration log and flagged irregularities.)
 
 ---
 

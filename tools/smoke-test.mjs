@@ -590,9 +590,14 @@ console.log('\n[4] props.js — the two-sided hit forecast');
     assert(String(f.pitcher.expected.xba) === '.231', 'pitcher xBA not read');
   });
 
-  await check('per-PA estimate is rendered on the live card', () => {
+  // Reference parity: the reference site publishes the local model, so this copy does too.
+  // It is never presented as an official value — the card must keep saying so.
+  await check('per-PA estimate is shown (reference parity) and labelled as not an MLB projection', () => {
     const html = text(dom.window.document.getElementById('live-panel'));
-    assert(/hit this PA/.test(html), 'forecast headline missing');
+    assert(/hit this PA/.test(html), 'forecast headline missing (reference parity broken)');
+    const forecast = text(dom.window.document.querySelector('.forecast'));
+    assert(/\d+(\.\d+)?%/.test(forecast), 'forecast probability missing (reference parity broken)');
+    assert(/Not an MLB projection or a betting line/.test(forecast), 'non-official disclaimer missing');
   });
 
   dom.window.close();

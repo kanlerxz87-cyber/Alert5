@@ -1,5 +1,5 @@
 {
-  "name": "mlb-live-pbp",
+  "name": "alert5",
   "version": "1.0.0",
   "private": true,
   "description": "MLB Live PBP — live MLB scoreboard, play-by-play and replay-review feed (static site, GitHub Pages).",
@@ -8,7 +8,9 @@
   "type": "module",
   "scripts": {
     "test": "node tools/smoke-test.mjs",
-    "serve": "node server.mjs"
+    "serve": "node server.mjs",
+    "test:all": "node tests/run-all.mjs && node tests/props-provenance-test.mjs && node tools/restoration-check.mjs && npm test",
+    "test:official": "node tests/upcoming-official.mjs"
   },
   "devDependencies": {
     "jsdom": "^31.0.1"
