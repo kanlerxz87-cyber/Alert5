@@ -1241,7 +1241,7 @@ node server.mjs                  # optional persistence backend (feed log + SSE)
           <td>C-S7</td>
           <td class="wrap"><strong>Upcoming game days.</strong> The next date MLB publishes games for is 2027-02-19; the six-game slice of that official response is now rendered through the real pages by <code>tests/preview-day-render-test.mjs</code> (24 checks: six cards, venue and “Scheduled” from the payload, no invented probable pitcher, game page clears its loading overlay with an empty <code>allPlays</code>, replay feed shows its empty state without inventing a review row).</td>
           <td class="wrap"><a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;startDate=2026-11-25&amp;endDate=2027-06-30" target="_blank" rel="noopener">/schedule 2026-11-25 → 2027-06-30</a> · <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-02-19&amp;hydrate=probablePitcher,linescore,decisions,review" target="_blank" rel="noopener">2027-02-19 hydrated</a></td>
-          <td class="status-ok">Verified — no games 2026-11-25 … 2027-02-18; first slate 2027-02-19 (16 games, all <code>Preview</code>)</td>
+          <td class="status-ok">Verified — no games 2026-11-25 … 2027-02-18; first slate 2027-02-19, <code>totalGames: 17</code>, all <code>Preview</code>/<code>Scheduled</code> (<a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-02-19&amp;fields=dates,date,totalGames,totalItems,games,gamePk" target="_blank" rel="noopener">count endpoint</a>). Live check: the published scoreboard lists all 17.</td>
         </tr>
       </tbody>
     </table>
