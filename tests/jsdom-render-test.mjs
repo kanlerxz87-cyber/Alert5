@@ -300,6 +300,16 @@ console.log(`jsdom-render-test: ${LIVE ? 'LIVE official API' : 'fixtures'} mode`
   close();
 }
 
+// Execute the inline base tag script at a nested Pages URL, not just /404.html.
+{
+  const dom = new JSDOM(readFileSync(path.join(ROOT, '404.html'), 'utf8'), {
+    url: 'https://kanlerxz87-cyber.github.io/Alert5/missing/deep/path', runScripts: 'dangerously',
+  });
+  check('404: nested Pages stylesheet stays inside Alert5', dom.window.document.querySelector('link[rel="stylesheet"]').href === 'https://kanlerxz87-cyber.github.io/Alert5/assets/css/style.css');
+  check('404: nested Pages back link stays inside Alert5', dom.window.document.querySelector('a').href === 'https://kanlerxz87-cyber.github.io/Alert5/index.html');
+  dom.window.close();
+}
+
 console.log(`jsdom-render-test: ${passes.length} checks passed`);
 if (failures.length) {
   console.error(`jsdom-render-test: ${failures.length} check(s) FAILED`);

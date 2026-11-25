@@ -20,18 +20,37 @@
   </header>
 
   <main class="flagged-main">
+    <section id="alert5-verification" class="flagged-intro">
+      <h1>Alert5 copy verification — 2026-11-25</h1>
+      <p>This site was copied from <a href="https://github.com/snapquast73-boop/LIVPBP/tree/5c02527d3c7a56ea66c698cfabff80a407b6dfd3">LIVPBP at commit 5c02527</a>, under its MIT license.
+      Everything below this section is <strong>inherited upstream audit history, not a fresh verification by Alert5</strong>.
+      Its dates and prior deployment claims refer to that repository. The original task board is preserved in
+      <a href="audit/upstream-coordination.md">upstream coordination history</a>.</p>
+      <ul>
+        <li><strong>Unverified:</strong> future live alert latency, browser audio permission and upstream API availability cannot be guaranteed. Alerts require an open page; no background push service is provided.</li>
+        <li><strong>Unverified model values withheld:</strong> upstream hit probabilities, tiers and driver adjustments are not official MLB values. This copy leaves those numeric displays blank and labels them unverified. Official batter/pitcher inputs and their source links remain available. <a href="https://statsapi.mlb.com/api/v1/people/605141/stats?stats=season&amp;group=hitting&amp;season=2026">Official MLB statistics endpoint</a> (not a source for model probabilities).</li>
+        <li><strong>Verified field-handling correction:</strong> upcoming schedules include <code>status.startTimeTBD=true</code> alongside a placeholder <code>gameDate</code>. This copy shows TBD rather than that placeholder time. <a href="https://statsapi.mlb.com/api/v1/schedule?sportId=1&amp;date=2027-04-01">Official upcoming slate</a>.</li>
+        <li><strong>Hosting limitation:</strong> GitHub Pages cannot run <code>server.mjs</code>; shared persistence is unavailable there. The upstream browser-local log remains supported. <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">GitHub Pages documentation</a>.</li>
+        <li><strong>Not independently reverified:</strong> historical fixture literals and all older audit claims. Tests using those fixtures verify behavior, not current MLB facts. Blank or dash values must not be interpreted as zero. Use each displayed row’s official MLB source link for manual review.</li>
+      </ul>
+      <p><a href="docs/alert5-copy-verification.md">Copy verification scope, sources and tests</a> · <a href="COORDINATION.md">Current coordination board</a></p>
+    </section>
+
     <div class="flagged-intro">
       <h1 style="margin-top:0">Flagged for Review</h1>
       <div style="border:1px solid #f59f00; border-left:4px solid #f59f00; background:rgba(245,159,0,.08); border-radius:8px; padding:10px 14px; margin:0 0 14px;">
         <strong>COPY (2026-11-25):</strong> this site (<code>kanlerxz87-cyber/Alert5</code>) is a working copy of
         <a href="https://github.com/snapquast73-boop/LIVPBP" target="_blank" rel="noopener">snapquast73-boop/LIVPBP</a>
-        at <code>5c02527d3c7a56ea66c698cfabff80a407b6dfd3</code>. This page is carried over unchanged from the
-        reference so the same review trail applies to the copy; every item below was recorded on the
-        reference (verification report dated 2026-11-20, audit 2026-11-22) and is published here
-        unedited for manual review. Items marked <span class="status-unverified">unverified</span> are
-        left blank on purpose — they are not inferred. None of these items blocks the merge of the copy.
-        The reference site is <a href="https://snapquast73-boop.github.io/LIVPBP/flagged.html" target="_blank" rel="noopener">snapquast73-boop.github.io/LIVPBP/flagged.html</a>;
-        the copy is deployed at <a href="https://kanlerxz87-cyber.github.io/Alert5/" target="_blank" rel="noopener">kanlerxz87-cyber.github.io/Alert5/</a>.
+        at <code>5c02527d3c7a56ea66c698cfabff80a407b6dfd3</code>, under its MIT license. This page is carried over
+        from the reference so the same review trail applies to the copy: every item below was recorded on the
+        reference (verification report dated 2026-11-20, audit 2026-11-22) and is published here unedited for
+        manual review. Items marked <span class="status-unverified">unverified</span> are left blank on purpose;
+        they are not inferred. None of these items blocks the merge. The reference site is
+        <a href="https://snapquast73-boop.github.io/LIVPBP/flagged.html" target="_blank" rel="noopener">snapquast73-boop.github.io/LIVPBP/flagged.html</a>;
+        this copy is deployed at <a href="https://kanlerxz87-cyber.github.io/Alert5/" target="_blank" rel="noopener">kanlerxz87-cyber.github.io/Alert5/</a>.
+        Two parallel copy sessions (<code>arena/7693d136-alert5</code>, merged via PR #1, and
+        <code>arena/6abe8874-alert5</code>) reconciled their copies on merge; see the Alert5 copy verification
+        section above (added by session <code>7693d136</code>) and <code>COORDINATION.md</code> for both session logs.
       </div>
       <p>
         This page lists every claim made about this rebuild together with the

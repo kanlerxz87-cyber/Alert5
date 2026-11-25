@@ -1,7 +1,5 @@
 name: Published Pages delivery
 on:
-  pull_request:
-    paths: ['tests/pages-delivery.mjs', '.github/workflows/pages-delivery.yml']
   workflow_dispatch:
   workflow_run:
     workflows: ['pages build and deployment', 'pages-build-deployment']

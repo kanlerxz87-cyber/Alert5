@@ -590,9 +590,10 @@ console.log('\n[4] props.js — the two-sided hit forecast');
     assert(String(f.pitcher.expected.xba) === '.231', 'pitcher xBA not read');
   });
 
-  await check('per-PA estimate is rendered on the live card', () => {
+  await check('unofficial per-PA estimate is withheld on the live card', () => {
     const html = text(dom.window.document.getElementById('live-panel'));
-    assert(/hit this PA/.test(html), 'forecast headline missing');
+    assert(/Unverified — no official MLB projection supplied/.test(html), 'unverified disclosure missing');
+    assert(!/\d+(?:\.\d+)?%/.test(text(dom.window.document.querySelector('.forecast'))), 'inferred probability must not be published');
   });
 
   dom.window.close();
