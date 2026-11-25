@@ -266,7 +266,7 @@ keeping the other session's text verbatim and appending this session's section a
 | Pending-ruling event types | [/api/v1/eventTypes](https://statsapi.mlb.com/api/v1/eventTypes) | `os_ruling_pending_primary/_prior` |
 | Team abbreviations | [/api/v1/teams?sportId=1](https://statsapi.mlb.com/api/v1/teams?sportId=1) | 30/30 match (`109`→AZ, `118`→KC) |
 | Review fields in PBP | [/game/823096/playByPlay](https://statsapi.mlb.com/api/v1/game/823096/playByPlay) | `MJ`, `isOverturned:true`, `challengeTeamId:143` |
-| Next date with games | [/schedule 2026-11-25 → 2027-06-30](https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-11-25&endDate=2027-06-30) | first slate **2027-02-19** (16 games, all Preview) |
+| Next date with games | [/schedule 2026-11-25 → 2027-06-30](https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-11-25&endDate=2027-06-30) | first slate **2027-02-19**, official `totalGames: 17`, all Preview/Scheduled (count verified via `fields=…,totalGames`; an earlier note in this session said 16 from a partial page read and was corrected) |
 
 ## Checks (this branch, on top of `main`)
 
