@@ -203,3 +203,26 @@ No other claims existed when this session began. Other sessions must request ove
 
 - 2026-11-25: Follow-up fix completed in https://github.com/kanlerxz87-cyber/Alert5/pull/10 . The regression check fails on the old hidden href and passes on the GitHub URL. Full local tests passed; PR checks and post-merge Pages delivery results are available at that PR and the repository Actions page. This entry does not pre-claim a future deploy result.
 - 2026-11-25: PR #10 merge was rejected because main advanced through independent verification PR #9 during the attempt. Rebased; resolved its append/append board conflict by preserving the entire ec8b9e36 verification note and this follow-up. Its new verification document and flagged section remain untouched. Retesting the combined tree before retrying merge.
+
+## Session 6abe8874 (parallel copy; reduced to non-overlapping fixes)
+
+- Session: `arena-6abe8874` (branch `arena/6abe8874-alert5`, base `e8ce3ccee068c419d71cc1678592007a60733d76`, PR #3: <https://github.com/kanlerxz87-cyber/Alert5/pull/3>)
+- Status: **done (parallel; main already integrated)** — this session's full-copy merge was **not** landed; see request at <https://github.com/kanlerxz87-cyber/Alert5/pull/3#issuecomment-7174249278>
+
+### Log
+| Time (UTC) | Session | Event | Details / Sources |
+|---|---|---|---|
+| 2026-11-25T20:44:00Z | 6abe8874 | Claimed copy task + copied upstream | `tar`-copied `snapquast73-boop/LIVPBP@5c02527d3c7a56ea66c698cfabff80a407b6dfd3` (excluding `.git`); rewrote `COORDINATION.md` as this repo's board; adapted `404.html` base path, `package.json` homepage, jsdom-harness origins and link-check/tests-README references to the `/Alert5/` project prefix. Reference: https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26 |
+| 2026-11-25T20:45:00Z | 6abe8874 | Line-by-line review pass | Read every file in the tree. No TODO/FIXME/debugger; JS `2026-*` dates are verification comments; provenance links to the source repo kept; `npm ci` viable (lock file present) |
+| 2026-11-25T20:50:00Z | 6abe8874 | Official-source spot checks | `schedule?date=2026-08-26` = 15 games incl. gamePks `823096` (PHI 6 @ SEA 0) and `823180` (CIN 10 @ SF 9) — matches the reference site render: <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-08-26&hydrate=probablePitcher,linescore,decisions,review> . `2026-11-25` slate = 0 games (offseason): <https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-11-25> ; next MLB dates 2027-02-19: <https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-11-25&endDate=2027-04-15&fields=dates,date,totalGames> . `gameStatus` registry live: <https://statsapi.mlb.com/api/v1/gameStatus> |
+| 2026-11-25T20:52:00Z | 6abe8874 | Local checks green | `restoration-check` ALL PASSED · `run-all`: syntax/link/contract PASS, jsdom-render 47/47 · `npm test`: 64 passed, 0 failed · `props-provenance`: 5/5 · `server.mjs`: all routes 200 |
+| 2026-11-25T20:56:00Z | 6abe8874 | Divergence found + reconciled | `gh pr merge 3` → PR #3 unmergeable: `main` had advanced through PRs #1, #2, #4, #6, #8 (sessions `7693d136`, `578585c0` via `integration/alert5-copy`, `7693d136`, `79f6678f`). Resolved by merging `origin/main` into this branch twice; **no integrated work was overwritten**: application code (`props.js` reference-parity restore, TBD start-time handling, smoke/jsdom suites, workflows) taken from `origin/main`; this branch's `tests/README.md` + `tests/link-check.mjs` `/Alert5/` identity fixes kept; `flagged.html` COPY banner re-applied on top of main's `alert5-verification` section (both kept). Combined board replaced this branch's board with main's, appending this record. |
+| 2026-11-25T20:57:00Z | 6abe8874 | Reduced PR #3 | Per the pause request, PR #3 now carries **only** non-overlapping additive fixes: `tests/README.md` + `tests/link-check.mjs` `/Alert5/` links, `flagged.html` COPY banner, this reconciliation record. The full-copy merge is deliberately **not** proposed. |
+| 2026-11-25T20:57:30Z | 6abe8874 | Post-merge checks | `npm run test:all` + `restoration-check` re-run green on the merged tree (jsdom-render 49/49, smoke 64/64, props-provenance 5/5, restoration-check PASS). |
+
+### Final links for this session
+- PR: <https://github.com/kanlerxz87-cyber/Alert5/pull/3>
+- Branch: `arena/6abe8874-alert5`
+- Files changed vs merged `main`: `flagged.html`, `tests/README.md`, `tests/link-check.mjs`, `COORDINATION.md` (this record)
+| 2026-11-25T21:00:00Z | 6abe8874 | Main moved again (PR #10) | During this session's push, `main` advanced to `7926d31` (PR #10 “Fix unpublished workflow link blocking Pages delivery verification”). Merged `origin/main` again: `flagged.html` and `tests/link-check.mjs` auto-merged cleanly (both kept); `COORDINATION.md` resolved by keeping **all** appended session notes (ec8b9e36's verification note, 7693d136's delivery follow-up claim, this session's record). No integrated work overwritten. |
+| 2026-11-25T21:01:00Z | 6abe8874 | PR #3 reduced scope reconfirmed | PR #3 diff vs `main` = `flagged.html` (COPY banner), `tests/README.md` + `tests/link-check.mjs` (`/Alert5/` links), `COORDINATION.md` (this record). No app code, no workflows, no data. |
