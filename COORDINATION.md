@@ -174,3 +174,16 @@ No other claims existed when this session began. Other sessions must request ove
 - Official upcoming source: https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-04-01
 - Published irregularities: https://kanlerxz87-cyber.github.io/Alert5/flagged.html#alert5-verification
 - Verification boundaries: [docs/alert5-copy-verification.md](docs/alert5-copy-verification.md). Copy/integration is complete; exhaustive re-verification of inherited historical claims is explicitly not claimed.
+
+## Session 79f6678f (parallel copy/integration attempt)
+
+- Session: `79f6678f` (branch `arena/79f6678f-alert5`, base `e8ce3ccee068c419d71cc1678592007a60733d76`)
+- Status: **done (parallel; main already integrated)**
+
+### Log
+| Time (UTC) | Session | Event | Details / Sources |
+|---|---|---|---|
+| 2026-11-25T20:42:00Z | 79f6678f | Claimed copy task | Inspected source `snapquast73-boop/LIVPBP` via GitHub API (`GET https://api.github.com/repos/snapquast73-boop/LIVPBP`, default_branch=main) and cloned main@`5c02527d3c7a56ea66c698cfabff80a407b6dfd3`. Reference: https://snapquast73-boop.github.io/LIVPBP/reviews.html?date=2026-08-26 |
+| 2026-11-25T20:46:00Z | 79f6678f | Copy+verify | Copied site files into Alert5; patched `404.html` `/LIVPBP/`→`/Alert5/`, `package.json` homepage for Alert5. Verification: `node tools/restoration-check.mjs` ALL CHECKS PASSED; `node tests/run-all.mjs` 4/4 PASS (41 refs, 8 bindings, 47 jsdom checks, 3 fixtures); `node tools/smoke-test.mjs` 64 passed, 0 failed. Official sources: GitHub API repo metadata, reference site, MLB StatsAPI endpoints exercised by smoke tests. |
+| 2026-11-25T20:52:00Z | 79f6678f | Merge conflict resolution | PR #8 (https://github.com/kanlerxz87-cyber/Alert5/pull/8) was not mergeable because main had advanced through PRs #1,#2,#4,#6 by other sessions. Fetched origin/main and resolved conflicts by taking `origin/main` for all conflicted application/workflow/test files to preserve integrated work; merged COORDINATION.md by keeping main log and appending this session note. No other session work discarded. |
+
