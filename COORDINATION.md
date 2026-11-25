@@ -93,7 +93,25 @@ therefore about **confirming the API field contract** (below) rather than fillin
 
 ## Integration record
 
-(filled in by C6 — PR link, merge result, Pages build status, live verification)
+Complete. Session `578585c0`, 2026-11-25.
+
+| Item | Result |
+|---|---|
+| Pull request | [PR #4 — Restore reference parity on the live copy](https://github.com/kanlerxz87-cyber/Alert5/pull/4) — merged into `main` |
+| Duplicate PR | [PR #1](https://github.com/kanlerxz87-cyber/Alert5/pull/1) (session `7693d136`) was already merged to `main`; its work is contained here in full, nothing discarded |
+| Merge commit | `a940729` on `main` |
+| Checks before merge | `test` **pass**, `official-upcoming` **pass** (real 2027-04-01 slate via the live StatsAPI, no fixtures), `dom-smoke` **pass**, merge state **CLEAN** |
+| Pages build | `pages build and deployment` run `45698933368` → **success**, commit `a940729`, status `built` at https://kanlerxz87-cyber.github.io/Alert5/ |
+| Live verification | Scoreboard: 15 games, 15 final, correct official scores and W/L/SV. Game page: linescore with per-row StatsAPI source links, pitch-by-pitch, ABS challenge chips (Overturned/Stands), 7 review events. Replay Feed: 10 reviews / 8 challenges / 2 umpire reviews / 68 ABS / 1 boundary call, per-row `MLB API ↗` links, challenge counters and runs-at-risk. Flagged page renders all sections. CSS serves correctly. |
+| Reference parity | `props.js` is byte-identical to the reference again; of the 9 JS files, the CSS and the 3 HTML pages, **only 4 lines differ** from `LIVPBP@5c02527` — all of them the verified `startTimeTBD` fix |
+
+### Deviations logged against the brief
+
+| # | Deviation | Why | Where it is published |
+|---|---|---|---|
+| 1 | Branch named `arena/578585c0-alert5`, not `session-<id>/<task>` | Arena fixes a session to one branch and forbids creating others | `flagged.html` §15 CP-11 |
+| 2 | An `integration/alert5-copy` branch was used for the final merge, then merged to `main` via PR | The board requires an integration session; the session's own branch stays its working branch | this record |
+| 3 | Two sessions claimed the same task (duplicate work) | Neither board existed when either started | `flagged.html` §16 M-6 |
 
 ## Handoffs / conflicts
 
