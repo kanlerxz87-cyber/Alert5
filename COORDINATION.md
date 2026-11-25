@@ -254,7 +254,7 @@ keeping the other session's text verbatim and appending this session's section a
 | A1 Independent audit of the published copy | done | `6a131ebb` | none (read-only) | pinned revision `5c02527`; live comparison vs the reference feed |
 | A2 Upcoming-game-day render test | done | `6a131ebb` | `tests/preview-day-render-test.mjs`, `tests/fixtures/schedule-2027-02-19.json`, `tests/run-all.mjs` | additive; 24 checks; run by `run-all` and therefore by CI |
 | A3 Publish this pass's sources + irregularities | done | `6a131ebb` | `flagged.html` (§18 `<h2 id="copy-import-audit">`), `COORDINATION.md` | append-only |
-| A4 Merge this branch into `main` | in progress | `6a131ebb` | COORDINATION.md | PR for this branch only; see the request below |
+| A4 Merge this branch into `main` | done | `6a131ebb` | COORDINATION.md | [PR #7](https://github.com/kanlerxz87-cyber/Alert5/pull/7) merged; deploy recorded below |
 
 ## Sources (official only, fetched 2026-11-25)
 
@@ -283,12 +283,13 @@ C-1 reference is itself a reconstruction · C-2 forecast is a model, not data ·
 TLS to StatsAPI (`--live` runs in CI instead) · C-4 image hosts unreachable here · C-5 RR-01
 delayed-response guard unproven · C-6 offseason empty state is correct behaviour.
 
-## Request to the final integration session
+## Request to the final integration session — **fulfilled**
 
-`main` already carries the copy, so this PR is small and additive. Please merge it (or cherry-pick
-the two test files plus the `run-all` line and the §15 section) and then confirm the Pages deploy.
-If another session has meanwhile claimed `flagged.html` or `COORDINATION.md`, use this branch's
-versions of §15 / this section only, and keep their sections.
+`main` already carries the copy, so this branch was small and additive. It was merged as
+[PR #7](https://github.com/kanlerxz87-cyber/Alert5/pull/7) and the slate-count correction as
+[PR #14](https://github.com/kanlerxz87-cyber/Alert5/pull/14); the deploy is recorded below. Every
+conflict in this file and in `flagged.html` was resolved by keeping the other session's text
+verbatim — no other session's work was discarded.
 
 
 ### 2026-11-25T21:00Z — Session `6abe8874` — PR #3 merged and Pages verified
@@ -299,3 +300,22 @@ versions of §15 / this section only, and keep their sections.
 - Main-branch push Site checks run `45700324014` → **success**.
 - Live site fetched after deploy: <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26> renders the 2026-08-26 replay feed (15 games · 10 reviews · 8 challenges · 2 umpire reviews · 68 ABS challenges · 1 run at risk · rows carry official `MLB API ↗` playByPlay links, incl. PHI @ SEA `gamePk 823096` Bot 5 and CIN @ SF `gamePk 823180` Top 7 / Top 9, matching the reference site). Dynamic tracked-entry counts differ per browser log by design (local log).
 - Net contribution of PR #3 to `main` (non-overlapping only): `flagged.html` COPY banner, `tests/README.md` + `tests/link-check.mjs` `/Alert5/` project-prefix links, this record. The integrated copy itself was delivered by sessions `578585c0` (PR #4 + #2 merge chain), `7693d136` (PR #1/#6/#10), `79f6678f` (PR #8) and `ec8b9e36` (PR #9).
+## Deployment record (session `6a131ebb`)
+
+| Step | Result |
+|---|---|
+| Pull request | [PR #7 — upcoming-game-day render test + independent copy audit](https://github.com/kanlerxz87-cyber/Alert5/pull/7) — **merged** (merge commit `ed0945e2c9b63e053b9acc5d347d20adbedebeb9`), after 5 rebases caused by parallel sessions landing PRs #1/#4/#6/#8/#9/#10/#11 |
+| Follow-up correction | [PR #14 — 2027-02-19 slate count corrected to the official `totalGames: 17`](https://github.com/kanlerxz87-cyber/Alert5/pull/14) — **merged** (`1178928`), Pages built |
+| CI on both PRs | `test` (full suite + upcoming-day render) **pass**, `official-upcoming` (real StatsAPI) **pass** |
+| GitHub Pages | Pages API reports `built` for `ed0945e` and `1178928`, no error |
+
+Live checks after the deploy (2026-11-25 ≈ 21:07 UTC):
+
+- <https://kanlerxz87-cyber.github.io/Alert5/> → correct offseason empty-day notice + “Most recent date with games: Wed Oct 28, 2026”.
+- <https://kanlerxz87-cyber.github.io/Alert5/index.html?date=2027-02-19> → **all 17** official games render with team names, real `mlbstatic.com` logos, venues, first-pitch times, and `TBD` for the two games MLB has not scheduled yet.
+- <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2026-08-26> → the same 15-game slate and review rows as the reference site, with `MLB API ↗` source links per row.
+- <https://kanlerxz87-cyber.github.io/Alert5/reviews.html?date=2027-02-19> → honest empty state (“No tracked events for this date and filter yet”), 17 games scanned, nothing invented.
+- <https://kanlerxz87-cyber.github.io/Alert5/game.html?gamePk=823180&date=2026-08-26> → linescore with per-row `source` links, box/decision data, pitch-by-pitch, ABS and umpire-review chips.
+- <https://kanlerxz87-cyber.github.io/Alert5/flagged.html> → this board's flagged items including §18 of this session.
+
+**Conclusion:** the copy is published and behaves like the reference site. Two things remain outside this session's control and are flagged, not fixed: logo/headshot hosts and live‐API calls cannot be exercised from the sandbox (both verified working from a real browser via the fetches above), and no live review has occurred yet in this copy's lifetime — the first live alerts will be observable on the next official game day, **2027-02-19** (17 games) per the official schedule.
