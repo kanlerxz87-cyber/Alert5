@@ -49,7 +49,7 @@
    * one of those plays (registry MH/MD/MO/MT/MS, "Manager challenge: …") is a
    * charged challenge, not a boundary review. Verified 2026-11-22 against
    * GET /api/v1/gameStatus and matching LIVPBP2's classification
-   * (audit/reference-parity-2026-11-22.md; reference repo snapquast73-boop/LIVPBP2). */
+   * (audit/reference-parity-2026-11-22.md). */
   var BOUNDARY_REASONS = [
     'Home run', 'Fair/foul in outfield', 'Stadium boundary call',
   ];

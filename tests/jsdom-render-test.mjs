@@ -148,7 +148,7 @@ async function render(pageFile, { query = '', wait = 900, before } = {}) {
   html = html.replace(/<script\b[^>]*src\s*=\s*"[^"]+"[^>]*><\/script>/gi, '');
 
   const errors = [];
-  const url = `https://kanlerxz87-cyber.github.io/Alert5/${pageFile}${query}`;
+  const url = `https://snapquast73-boop.github.io/LIVPBP/${pageFile}${query}`;
   const dom = new JSDOM(html, {
     url,
     runScripts: 'outside-only',

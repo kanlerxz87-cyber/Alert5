@@ -3,7 +3,7 @@
  *
  * Fails when any page references a local stylesheet, script, image or link that
  * does not exist in the repository, when an HTML page uses a local absolute path
- * (which breaks under the /Alert5/ Pages prefix), or when a CSS url() target is
+ * (which breaks under the /LIVPBP/ Pages prefix), or when a CSS url() target is
  * missing. No dependencies, no network.
  *
  *   node tests/link-check.mjs

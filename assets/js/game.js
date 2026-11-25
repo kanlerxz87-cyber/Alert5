@@ -209,7 +209,7 @@
     } else if (meta.final) {
       centerBits.push('<div class="status-sub">Final</div>');
     } else if (status.detailedState) {
-      centerBits.push('<div class="status-sub">' + UI.esc(MLB.formatGameTime(feed.gameData.datetime && feed.gameData.datetime.dateTime)) + '</div>');
+      centerBits.push('<div class="status-sub">' + UI.esc(((feed.gameData.status || {}).startTimeTBD ? 'TBD' : MLB.formatGameTime(feed.gameData.datetime && feed.gameData.datetime.dateTime))) + '</div>');
     }
 
     $('header-away').innerHTML = sideBlock(away);
@@ -253,7 +253,7 @@
     if (!status.live && !status.final) {
       wrap.innerHTML = '<div class="live-card"><h4>Pregame</h4><div class="last-play">' +
         UI.esc(status.label) + ' — first pitch ' +
-        UI.esc(MLB.formatGameTime(feed.gameData.datetime && feed.gameData.datetime.dateTime) || 'TBD') + '</div></div>';
+        UI.esc(((feed.gameData.status || {}).startTimeTBD ? 'TBD' : MLB.formatGameTime(feed.gameData.datetime && feed.gameData.datetime.dateTime)) || 'TBD') + '</div></div>';
       return;
     }
 

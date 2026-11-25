@@ -275,7 +275,7 @@
       if (typeof outs === 'number') metaBits.push(outs + ' out' + (outs === 1 ? '' : 's'));
     }
     if (!meta.live && !meta.final) {
-      metaBits.push(MLB.formatGameTime(game.gameDate) || 'TBD');
+      metaBits.push((status.startTimeTBD ? 'TBD' : MLB.formatGameTime(game.gameDate)) || 'TBD');
     }
     if (game.venue && game.venue.name) metaBits.push(game.venue.name);
     if (game.seriesGameNumber && game.gamesInSeries) {
@@ -305,7 +305,7 @@
       '<a class="' + classList.join(' ') + '" href="game.html?gamePk=' + encodeURIComponent(game.gamePk) + '&date=' + encodeURIComponent(state.date) + '">' +
         '<div class="card-top">' +
           '<span class="card-status ' + meta.cls + '">' + UI.esc(statusText) + '</span>' +
-          '<span>' + UI.esc(MLB.formatGameTime(game.gameDate)) + '</span>' +
+          '<span>' + UI.esc(status.startTimeTBD ? 'TBD' : MLB.formatGameTime(game.gameDate)) + '</span>' +
         '</div>' +
         teamRow(away, awayScore, game) +
         teamRow(home, homeScore, game) +

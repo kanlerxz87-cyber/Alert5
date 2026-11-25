@@ -98,3 +98,44 @@ therefore about **confirming the API field contract** (below) rather than fillin
 ## Handoffs / conflicts
 
 (none yet)
+
+---
+
+## Merge record — parallel session `7693d136` (2026-11-25)
+
+Two sessions were assigned the same copy task at the same time, and neither board existed when they
+started, so both claimed it. Nothing was discarded; this branch is the union of the two.
+
+`7693d136` was reviewed file by file against both the reference repo and the official API:
+
+| Their file | Decision | Why |
+|---|---|---|
+| `assets/js/game.js`, `assets/js/scoreboard.js` | **Kept** | `status.startTimeTBD` handling. Re-verified here against `schedule?date=2027-04-01`: 8 games, `startTimeTBD:true` on 854204 / 853879 / 854049 with placeholder `gameDate`s (`07:33:00Z`, `08:33:00Z`). Showing those placeholder times would be wrong. |
+| `assets/js/props.js` | **Reverted to reference** | They blanked the hit forecast because it is not an official MLB value. Sound reasoning, but the instruction for this repo is to copy the reference so it runs the same; upstream already discloses it in-card ("Not an MLB projection or a betting line") and flags the constants as U-2 / U-9. Disclosed on `flagged.html` §16 M-3. |
+| `audit/upstream-manifest.json`, `audit/upstream-coordination.md`, `docs/alert5-copy-verification.md` | **Kept** | SHA-256 manifest of all 40 upstream files + upstream board preserved verbatim. Independently useful for re-verifying the copy. |
+| `tests/upcoming-official.mjs` + `test:official` script | **Kept** | Renders the real scoreboard and replay feed against a real official upcoming slate, no fixture substitution. Correctly placed in CI because this sandbox's shell has no StatsAPI access. Re-verified the slate it uses (`2027-04-01`, 8 games) from the official endpoint. |
+| `flagged.html` Alert5 disclosure box | **Kept, one bullet corrected** | Its "model values withheld" bullet was rewritten to match the restored forecast behaviour. |
+| `flagged.html` §16 / this file | **Added** | Merge decisions M-1…M-6 recorded so the next session can see what was accepted and what was reverted and why. |
+| `README.md`, `package.json`, `tests/*`, `.github/workflows/site-check.yml` | **Union** | Their versions taken, this session's `Alert5` identity edits re-applied on top. |
+
+Conflict resolution summary: `git merge` conflicted on 14 files; all were resolved by hand as above,
+no `--ours`/`--theirs` blanket choice, and the combined tree was re-run through every check before the
+merge commit.
+
+# Coordination
+
+Session: `7693d136` (final integration session). Assigned platform branch: `arena/7693d136-alert5`; this fixed branch takes precedence over the requested session branch naming convention.
+
+| Task | Status | Owner | File scope |
+| --- | --- | --- | --- |
+| Inspect and copy upstream MLB application; verify, integrate, publish | in progress | 7693d136 | All application files, docs, tests, workflows, COORDINATION.md |
+
+No other claims existed when this session began. Other sessions must request overlapping changes here rather than editing claimed files.
+
+## Log
+- 2026-11-25: Repository contained only README.md; inspected upstream metadata through GitHub API. Upstream https://github.com/snapquast73-boop/LIVPBP declares MIT license. No data verified yet. Claim recorded before application work.
+- 2026-11-25: Initial branch-specific pull failed because the remote branch did not exist. Pulled/rebased from main and pushed the claim to the assigned branch; no conflict and no other branch created.
+- 2026-11-25: Copied upstream commit `5c02527d3c7a56ea66c698cfabff80a407b6dfd3` with MIT license. Preserved upstream task history separately in `audit/upstream-coordination.md`; SHA-256 source manifest in `audit/upstream-manifest.json`.
+- 2026-11-25: Source page fetched successfully. Official upcoming schedule fetched via web retrieval: https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2027-04-01 (eight scheduled games). Direct shell network to StatsAPI is blocked; live integration moved to GitHub Actions rather than pretending fixture tests are live verification.
+- 2026-11-25: Local full checks pass: syntax, 44 local references, DOM contracts, 47 fixture render checks, 5 props source checks, optional-server contract and 64 smoke checks. npm install audit reported zero vulnerabilities. Withheld unofficial forecast numbers and corrected TBD start time handling; all other app code copied intact. Added upcoming official-data CI. Details and limitations: docs/alert5-copy-verification.md.
+- 2026-11-25: Published inherited-claims-not-reverified disclosure, static persistence/audio/polling limitations and model-value withholding on flagged.html#alert5-verification. These are needs-review items and do not block publication. Upstream historical audit assertions are not claimed as newly verified.
