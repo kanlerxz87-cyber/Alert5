@@ -8,6 +8,13 @@
  * Persisted state lives in data/feed-log-<YYYY-MM-DD>.json so that any
  * client/browser visiting the website immediately receives all tracked
  * entries, scoring changes, and baselines across browsers and sessions.
+ *
+ * Two stores, deliberately separate:
+ *   /api/feed-log    alerts   (challenges, reviews, boundary calls, runs at risk)
+ *   /api/game-state  record   (second-stamped game state, official-scoring
+ *                              pending rulings and scoring changes)
+ * A write to one can never block or corrupt the other, which is what keeps a
+ * problem in the official-scoring log from disturbing the alert feed.
  * ==========================================================================*/
 
 import http from 'node:http';
@@ -63,6 +70,112 @@ function sendError(res, statusCode, message) {
 function getLogFilePath(dateStr) {
   if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
   return path.join(DATA_DIR, `feed-log-${dateStr}.json`);
+}
+
+/* Official-scoring / live-state store. Separate file, separate schema. */
+function getStateFilePath(dateStr) {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  return path.join(DATA_DIR, `game-state-${dateStr}.json`);
+}
+
+function readStateFromDisk(dateStr) {
+  const filePath = getStateFilePath(dateStr);
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (err) {
+    console.warn(`[server] failed to read game state for ${dateStr}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Merge an incoming state bucket into the one on disk. Ledger rows are keyed
+ * by gamePk:kind:atBatIndex:basis and are never dropped; the newest snapshot
+ * per game wins; transitions are unioned.
+ */
+function mergeStateBuckets(existing, incoming, dateStr) {
+  const now = Date.now();
+  if (!existing || typeof existing !== 'object' || existing.v !== 1) {
+    return {
+      v: 1,
+      date: dateStr,
+      savedAt: now,
+      games: incoming.games || {},
+      snapshots: incoming.snapshots || {},
+      ledger: Array.isArray(incoming.ledger) ? incoming.ledger : [],
+      transitions: Array.isArray(incoming.transitions) ? incoming.transitions : [],
+      seen: incoming.seen || {},
+    };
+  }
+  const keyOf = (row) => (row ? [row.gamePk, row.kind, row.atBatIndex, row.basis].join(':') : '');
+  const ledgerMap = new Map();
+  const order = [];
+  [...(existing.ledger || []), ...(incoming.ledger || [])].forEach((row) => {
+    const key = keyOf(row);
+    if (!key) return;
+    const prev = ledgerMap.get(key);
+    if (!prev) {
+      ledgerMap.set(key, row);
+      order.push(key);
+      return;
+    }
+    const merged = { ...prev, ...row };
+    merged.firstSeen = Math.min(Number(prev.firstSeen) || 0, Number(row.firstSeen) || 0) || row.firstSeen;
+    merged.lastSeen = Math.max(Number(prev.lastSeen) || 0, Number(row.lastSeen) || 0);
+    merged.history = [...(prev.history || []), ...(row.history || [])].slice(-40);
+    if (prev.state === 'resolved' && row.state !== 'resolved') merged.state = prev.state;
+    ledgerMap.set(key, merged);
+  });
+  /* Read the merged objects back out by key: the first-seen object stays in
+   * `order`, so the merge has to be applied where the map, not the list, is
+   * authoritative. */
+  const ledger = order.map((key) => ledgerMap.get(key)).filter(Boolean);
+
+  const transMap = new Map();
+  [...(existing.transitions || []), ...(incoming.transitions || [])].forEach((t) => {
+    const key = [t.gamePk, t.at, t.field].join('|');
+    if (!transMap.has(key)) transMap.set(key, t);
+  });
+  const transitions = [...transMap.values()].sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 600);
+
+  const games = { ...(existing.games || {}) };
+  for (const [pk, snap] of Object.entries(incoming.games || {})) {
+    const mine = games[pk];
+    if (!mine || (Number(snap.at) || 0) > (Number(mine.at) || 0)) games[pk] = snap;
+  }
+
+  const snapshots = { ...(existing.snapshots || {}) };
+  for (const [pk, ring] of Object.entries(incoming.snapshots || {})) {
+    if (!snapshots[pk] || snapshots[pk].length < ring.length) snapshots[pk] = ring;
+  }
+
+  return {
+    v: 1,
+    date: dateStr,
+    savedAt: now,
+    games,
+    snapshots,
+    ledger: ledger.slice(0, 800),
+    transitions,
+    seen: { ...(existing.seen || {}), ...(incoming.seen || {}) },
+  };
+}
+
+function writeStateToDisk(dateStr, payload) {
+  const filePath = getStateFilePath(dateStr);
+  if (!filePath) return false;
+  try {
+    const existing = readStateFromDisk(dateStr);
+    const merged = mergeStateBuckets(existing, payload, dateStr);
+    const tempPath = `${filePath}.tmp.${Date.now()}`;
+    fs.writeFileSync(tempPath, JSON.stringify(merged, null, 2), 'utf8');
+    fs.renameSync(tempPath, filePath);
+    return merged;
+  } catch (err) {
+    console.error(`[server] failed to write game state for ${dateStr}:`, err);
+    return false;
+  }
 }
 
 function readLogFromDisk(dateStr) {
@@ -386,6 +499,61 @@ const server = http.createServer((req, res) => {
           });
         } else {
           sendError(res, 500, 'Failed to save feed log to disk');
+        }
+      } catch (err) {
+        sendError(res, 400, `JSON parse error: ${err.message}`);
+      }
+    });
+    return;
+  }
+
+  // GET /api/game-state?date=YYYY-MM-DD — the separate live-state /
+  // official-scoring store. Independent of /api/feed-log on purpose.
+  if (pathname === '/api/game-state' && req.method === 'GET') {
+    const dateStr = reqUrl.searchParams.get('date');
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      sendError(res, 400, 'date query parameter in YYYY-MM-DD format is required');
+      return;
+    }
+    const bucket = readStateFromDisk(dateStr);
+    sendJSON(res, 200, bucket || {
+      v: 1, date: dateStr, savedAt: Date.now(),
+      games: {}, snapshots: {}, ledger: [], transitions: [], seen: {},
+    });
+    return;
+  }
+
+  // POST /api/game-state — idempotent merge of a client bucket.
+  if (pathname === '/api/game-state' && req.method === 'POST') {
+    let body = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 20 * 1024 * 1024) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Payload too large' }));
+        req.destroy();
+      }
+    });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        if (!payload || typeof payload !== 'object' || payload.v !== 1 ||
+          !payload.date || !/^\d{4}-\d{2}-\d{2}$/.test(payload.date)) {
+          sendError(res, 400, 'Invalid payload: must be object with v: 1 and valid date (YYYY-MM-DD)');
+          return;
+        }
+        const saved = writeStateToDisk(payload.date, payload);
+        if (saved) {
+          sendJSON(res, 200, {
+            ok: true,
+            date: payload.date,
+            savedAt: saved.savedAt,
+            ledgerCount: saved.ledger.length,
+            gamesCount: Object.keys(saved.games).length,
+          });
+        } else {
+          sendError(res, 500, 'Failed to save game state to disk');
         }
       } catch (err) {
         sendError(res, 400, `JSON parse error: ${err.message}`);

@@ -36,7 +36,9 @@
     </div>
     <div id="date-label" class="date-label"></div>
     <div class="feed-controls">
-      <button id="sound-toggle-btn" class="btn btn-ghost" title="Toggle alert sound — a gentle raindrop chime for new challenges/reviews/boundary calls, official-scorer pending rulings and official scoring changes (not ABS), and the same chime whenever an active review could remove a run already on the scoreboard">🔇 Sound Off</button>
+      <button id="sound-toggle-btn" class="btn btn-ghost" aria-pressed="false" title="Alert sound on/off. Turning it on plays the real ~3 s raindrop once, so the alert path can be tested at any time. It sounds for every event that appears in the feed: new challenges, reviews and boundary calls, official-scorer pending rulings, official scoring changes and runs at risk (routine ABS pitch challenges stay silent).">🔇 Alert sound off</button>
+      <button id="sound-test-btn" class="btn btn-ghost" title="Play the alert sound once, even while alerts are muted">▶︎ Test sound</button>
+      <span id="sound-state" class="sound-state" aria-live="polite">off</span>
       <button id="notify-toggle-btn" class="btn btn-ghost" title="Toggle desktop notifications for run-at-risk reviews — a popup the moment an active review could take a run off the scoreboard">⚪ Run Alerts Off</button>
       <button id="refresh-btn" class="btn">Refresh</button>
       <span class="countdown" id="countdown" title="Seconds until the next poll"></span>
@@ -57,7 +59,18 @@
 
     <section id="feed-list" class="feed-list" aria-live="polite"></section>
 
+    <div id="latency-readout" class="latency-readout" title="Live scheduler cadence and request budget"></div>
+
     <div id="status-line" class="status-line"></div>
+
+    <!-- Kept deliberately separate from the alert feed above: the official
+         scoring log pages its own rows out of its own persisted store
+         (assets/js/scoring-log.js + game-state.js), so a problem in the alert
+         path cannot lose the record and a problem here cannot silence an
+         alert. -->
+    <section id="scoring-panel" class="feed-section scoring-section" aria-label="Official scoring log"></section>
+
+    <section id="state-panel" class="feed-section state-section" aria-label="Live game state"></section>
   </main>
 
   <footer class="site-footer">
@@ -107,6 +120,27 @@
       scoring baselines and the flagged irregularities before the first scan runs; the log holds
       only observed payload data, and anything malformed in it is dropped with a console warning
       rather than guessed.
+      <strong>Live game state</strong> is captured for every game on every cycle: score,
+      inning/half, outs, count, pitch count (counted from official pitch events), batter at bat,
+      pitcher, runners and the official status wording, each stamped to the second. Consecutive
+      captures are diffed, so the transitions — not only the latest values — are recorded and shown
+      in the 📡 Game State tab, with the newest transitions repeated in the All feed.
+      <strong>The ✏️ Official Scoring section is separate from the alert feed on purpose.</strong>
+      It holds official-scorer pending rulings (<code>os_ruling_pending_primary</code> /
+      <code>os_ruling_pending_prior</code> — at-bats MLB has not scored yet) and official scoring
+      changes, each with the exact official wording before and after, and it is persisted in its
+      own store (a separate localStorage key, and <code>/api/game-state</code> when the optional
+      server is running), so it survives a refresh and cannot disturb the alerts. A pending ruling
+      is updated to its resolved wording, never deleted. CSV and JSON export are provided for
+      review. <strong>Alert sound:</strong> a ~3 second synthesized raindrop, off by default; the
+      ▶︎ Test sound button plays it even while alerts are muted, and the sound fires for every event
+      in this feed (routine ABS pitch challenges stay silent by policy). <strong>Request rate is
+      bounded</strong> by per-class token buckets in <code>assets/js/api.js</code>; the read-out
+      under the feed shows the cadence actually held, the ceiling and any deferred cycle. Latency
+      and the terms-of-use position are documented in
+      <a href="docs/api-latency-and-terms.md">docs/api-latency-and-terms.md</a>; live state and the
+      official-scoring log in
+      <a href="docs/live-state-and-scoring-log.md">docs/live-state-and-scoring-log.md</a>.
       Not affiliated with MLB or MLB Advanced Media.
       <a href="flagged.html">⚑ Flagged for Review</a> — verification log and unverified items.
     </p>
@@ -116,6 +150,9 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/reviews.js"></script>
   <script src="assets/js/feed-log.js"></script>
+  <script src="assets/js/game-state.js"></script>
+  <script src="assets/js/scoring-log.js"></script>
+  <script src="assets/js/alert-sound.js"></script>
   <script src="assets/js/reviews-feed.js"></script>
 </body>
 </html>

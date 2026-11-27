@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node tools/smoke-test.mjs",
     "serve": "node server.mjs",
-    "test:all": "node tests/run-all.mjs && node tests/props-provenance-test.mjs && node tools/restoration-check.mjs && npm test",
+    "test:all": "node tests/run-all.mjs && node tests/props-provenance-test.mjs && node tests/state-log-test.mjs && node tools/restoration-check.mjs && npm test",
+    "test:state": "node tests/state-log-test.mjs",
     "test:official": "node tests/upcoming-official.mjs"
   },
   "devDependencies": {

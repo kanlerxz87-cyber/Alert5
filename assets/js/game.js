@@ -20,9 +20,14 @@
   var Reviews = global.Reviews;
   var Props = global.Props;
   var FeedLog = global.FeedLog;
+  var GameState = global.GameState;
+  var AlertSound = global.AlertSound;
 
   var LIVE_POLL_MS = 500;
   var REVIEW_POLL_MS = 250;
+  /* The state snapshot is written at most this often (the poll itself is
+   * faster); it is a record, not a render loop. */
+  var STATE_RECORD_MS = 1000;
   var PREVIEW_POLL_MS = 30000;
   var FINAL_POLL_MS = 60000;
   var STATUS_WATCH_MS = 125;
@@ -49,6 +54,10 @@
     lastSignature: '',
     lastError: null,
     pendingRerender: false,
+    stateSeq: 0,
+    lastStateAt: 0,
+    lastReviewIds: Object.create(null),
+    soundOn: false,
   };
 
   function $(id) { return document.getElementById(id); }
@@ -787,6 +796,52 @@
     state.timer = setTimeout(refresh, delay);
   }
 
+  /**
+   * Append the official state of this game to the same persisted store the
+   * Replay Feed writes (so a single game page also keeps a second-stamped
+   * before/after record), and play the shared alert sound for a review that
+   * appears here for the first time.
+   */
+  function recordStateAndAlert() {
+    var feed = state.feed;
+    if (!feed || !GameState) return;
+    var now = Date.now();
+
+    /* Alerts: a new review event on this game, once per event id. */
+    (state.reviews || []).forEach(function (review) {
+      if (!review || !review.id || state.lastReviewIds[review.id]) return;
+      state.lastReviewIds[review.id] = true;
+      if (review.isABS) return;                 /* routine, stays silent */
+      if (!state.soundOn) return;
+      if (now - (state.lastStateAt || 0) < 1) return;
+      AlertSound.play('review', { force: true });
+    });
+
+    if (now - state.lastStateAt < STATE_RECORD_MS) return;
+    state.lastStateAt = now;
+    try {
+      var date = (feed.gameData && feed.gameData.datetime && feed.gameData.datetime.officialDate) ||
+        (state.log && state.log.date) || MLB.todayISO();
+      var persistence = GameState.createPersistence(date, { server: false });
+      persistence.load().then(function (bucket) {
+        var prev = (bucket.games || {})[String(state.gamePk)] || null;
+        var snap = GameState.snapshot(feed, state.plays, {
+          at: now,
+          gamePk: state.gamePk,
+          officialDate: date,
+          source: 'feed/live (game page)',
+          sourceUrl: 'https://statsapi.mlb.com/api/v1.1/game/' + state.gamePk + '/feed/live',
+        });
+        if (!snap || !snap.gamePk) return;
+        var rows = GameState.diff(prev, snap);
+        /* record() writes to localStorage itself; the persistence layer adds the
+         * optional server mirror (disabled here, so a game page never races the
+         * Replay Feed's own writes). */
+        GameState.record(persistence.store, date, snap, rows, null);
+      }).catch(function () { /* the log is a record, never a blocker */ });
+    } catch (e) { /* ignore */ }
+  }
+
   function refresh() {
     if (document.hidden) { scheduleNext(); return; }
     if (state.pollInFlight) return;
@@ -817,6 +872,7 @@
       state.lastError = null;
       state.plays = Reviews.playsOf(feed);
       deriveReviews();
+      recordStateAndAlert();
 
       if (state.log) applyScoringChangesFromLog();
 
@@ -898,6 +954,13 @@
 
   function init() {
     state.gamePk = parseGamePk();
+    state.soundOn = global.AlertSound ? AlertSound.isEnabled() : false;
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (type) {
+      global.addEventListener(type, function once() {
+        if (global.AlertSound) AlertSound.prime();
+        global.removeEventListener(type, once);
+      }, { passive: true });
+    });
     if (!state.gamePk) {
       setLoading(false);
       if ($('main')) {
