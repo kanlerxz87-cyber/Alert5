@@ -172,7 +172,7 @@
           <td>I-2</td>
           <td class="wrap"><code>docs/</code> referenced by the README (<code>verification-report.md</code>, <code>api-compliance.md</code>, <code>scoring-changes.md</code>, <code>workflows/pages.yml</code>, <code>workflows/smoke.yml</code>) does not exist.</td>
           <td class="wrap">README “Project structure”, “Deploy to GitHub Pages”, “Notes &amp; etiquette” (<a href="https://github.com/snapquast73-boop/LIVPBP/blob/aef1a74c40143a7fff9d24853418002e008b79b1/README.md" target="_blank" rel="noopener">base README @ aef1a74</a>).</td>
-          <td class="wrap"><code>docs/verification-report.md</code> re-created; deployment uses the repository's native Pages build (Settings → Pages → <code>main</code> / root), so no workflow file is needed. Remaining missing docs are flagged U-7.</td>
+          <td class="wrap"><code>docs/verification-report.md</code> and <code>docs/api-compliance.md</code> re-created (the latter documents the request budget and the two governing clauses, measured against the live API on 2026-11-27); deployment uses the repository's native Pages build (Settings → Pages → <code>main</code> / root), so no workflow file is needed. <code>docs/scoring-changes.md</code> is superseded by the persistent Official Scoring Log shipped in <code>reviews.html</code> + <code>assets/js/scoring-log.js</code>. Remaining missing docs are flagged U-7.</td>
         </tr>
         <tr>
           <td>I-3</td>
@@ -271,7 +271,7 @@
           <td>U-7</td>
           <td class="wrap">Original <code>docs/*</code> and <code>tools/*</code> files</td>
           <td></td>
-          <td class="wrap">Not uploaded, not recoverable. <code>docs/verification-report.md</code> was re-created with this session's evidence; the other referenced documents (<code>api-compliance.md</code>, <code>scoring-changes.md</code>) and the 17 test scripts do not exist in this repo.</td>
+          <td class="wrap">Not uploaded, not recoverable. <code>docs/verification-report.md</code> and <code>docs/api-compliance.md</code> were re-created with this session's evidence; <code>docs/scoring-changes.md</code> is superseded by the shipped scoring log, and the 17 original test scripts do not exist in this repo (replaced by <code>tools/</code> + <code>tests/</code>).</td>
           <td class="wrap"><a href="https://api.github.com/repos/snapquast73-boop/LIVPBP/git/trees/aef1a74c40143a7fff9d24853418002e008b79b1?recursive=1" target="_blank" rel="noopener">base upload tree @ aef1a74</a></td>
           <td class="status-unverified">Unverified</td>
         </tr>

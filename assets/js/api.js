@@ -278,6 +278,33 @@
     'first', 'second', 'third',
   ].join(',');
 
+  /* The LIVE-STATE projection.  Same one-request capture, but without the
+   * historical play log: the running state (score, count, outs, bases, batter,
+   * pitcher, on deck/in the hole, counters, status) plus the CURRENT at-bat.
+   * Measured on a 7th-inning snapshot (game 824638, 2026-08-28): ~1.7 KB
+   * against ~16 KB for the whole feed, and it still carries `statusCode`
+   * (M, N and IH status codes open a review) and the current at-bat's own
+   *  startTime/endTime — so a
+   * review can be caught and closed at the exact second without ever reading
+   * the play log.  The play log is fetched separately, once, to seed the
+   * official-scoring baseline.
+   */
+  var STATE_FIELDS = [
+    'metaData', 'timeStamp', 'wait', 'gameEvents', 'logicalEvents',
+    'gameData', 'game', 'pk', 'season', 'datetime', 'officialDate', 'status',
+    'detailedState', 'statusCode', 'abstractGameState', 'codedGameState',
+    'reason', 'startTimeTBD', 'teams', 'away', 'home', 'id', 'name',
+    'abbreviation', 'venue', 'review', 'absChallenges', 'hasChallenges', 'used',
+    'remaining', 'usedSuccessful', 'usedFailed',
+    'liveData', 'linescore', 'currentInning', 'currentInningOrdinal',
+    'inningState', 'isTopInning', 'balls', 'strikes', 'outs', 'runs', 'hits',
+    'errors', 'leftOnBase', 'offense', 'defense', 'batter', 'pitcher', 'onDeck',
+    'inHole', 'first', 'second', 'third', 'fullName',
+    'plays', 'currentPlay', 'matchup', 'result', 'eventType', 'description',
+    'isOut', 'rbi', 'awayScore', 'homeScore', 'about', 'atBatIndex',
+    'isComplete', 'startTime', 'endTime',
+  ].join(',');
+
   /* The tiny change detector: ~150 bytes of official clock + event names. */
   var PROBE_FIELDS = 'metaData,timeStamp,wait,gameEvents,logicalEvents';
 
@@ -290,6 +317,16 @@
     var qs = ['fields=' + encodeURIComponent(opts.fields || FEED_FIELDS)];
     if (opts.timecode) qs.push('timecode=' + encodeURIComponent(opts.timecode));
     return API_ROOT + '/v1.1/game/' + encodeURIComponent(gamePk) + '/feed/live?' + qs.join('&');
+  }
+
+  function gameStateCaptureUrl(gamePk, opts) {
+    var qs = ['fields=' + encodeURIComponent((opts && opts.fields) || STATE_FIELDS)];
+    if (opts && opts.timecode) qs.push('timecode=' + encodeURIComponent(opts.timecode));
+    return API_ROOT + '/v1.1/game/' + encodeURIComponent(gamePk) + '/feed/live?' + qs.join('&');
+  }
+
+  function gameStateCapture(gamePk, opts) {
+    return getJSON(gameStateCaptureUrl(gamePk, opts), { retries: (opts && opts.retries !== undefined) ? opts.retries : 1 });
   }
 
   function gameFeedCapture(gamePk, opts) {
@@ -466,6 +503,9 @@
     feedProbe: feedProbe,
     feedProbeUrl: feedProbeUrl,
     FEED_FIELDS: FEED_FIELDS,
+    STATE_FIELDS: STATE_FIELDS,
+    gameStateCaptureUrl: gameStateCaptureUrl,
+    gameStateCapture: gameStateCapture,
     PROBE_FIELDS: PROBE_FIELDS,
     gameStatusLean: gameStatusLean,
     playByPlay: playByPlay,

@@ -72,6 +72,52 @@ try {
   }
   const dotRes = await req('GET', '/.git/HEAD');
   ok(dotRes.status === 403, 'server: GET /.git/HEAD -> 403');
+
+  /* Request targets that are not parseable URLs must answer 400 and leave the
+   * process serving — a `//` path used to throw inside the handler and kill it
+   * (found 2026-11-27 while serving the new pages). */
+  const badPaths = ['//', '/%E0%A4%A'];
+  for (const p of badPaths) {
+    const res = await req('GET', p);
+    ok(res.status === 400, `server: malformed request target ${p} -> 400 (got ${res.status})`);
+  }
+  const stillAlive = await req('GET', '/api/health');
+  ok(stillAlive.status === 200, 'server: survives a malformed request target');
+
+  /* The official scoring log is a SEPARATE store with its own endpoints. */
+  const emptyScoring = await req('GET', '/api/scoring-log?date=2024-06-01');
+  ok(emptyScoring.status === 200 && Array.isArray(JSON.parse(emptyScoring.body).entries),
+    'server: GET /api/scoring-log returns an empty log');
+  const pendingPost = await req('POST', '/api/scoring-log', JSON.stringify({
+    v: 1, date: '2024-06-01', entries: [{
+      id: '824638:71:pending', kind: 'pending', date: '2024-06-01', gamePk: 824638,
+      atBatIndex: 71, status: 'open', firstSeenAt: 1, lastSeenAt: 1,
+      before: { eventType: 'os_ruling_pending_primary', description: 'Official Scorer Ruling Pending' },
+      notes: ['opened'],
+    }],
+  }));
+  ok(pendingPost.status === 200 && JSON.parse(pendingPost.body).ok === true,
+    'server: POST /api/scoring-log accepts a pending ruling');
+  const resolvedPost = await req('POST', '/api/scoring-log', JSON.stringify({
+    v: 1, date: '2024-06-01', entries: [{
+      id: '824638:71:pending', kind: 'pending', date: '2024-06-01', gamePk: 824638,
+      atBatIndex: 71, status: 'resolved', lastSeenAt: 2, resolvedAt: 2,
+      after: { eventType: 'single', description: 'Singles.' }, notes: ['resolved'],
+    }],
+  }));
+  const scoringGet = await req('GET', '/api/scoring-log?date=2024-06-01');
+  const scoringLog = JSON.parse(scoringGet.body);
+  ok(resolvedPost.status === 200 && scoringLog.entries.length === 1 &&
+    scoringLog.entries[0].status === 'resolved' &&
+    scoringLog.entries[0].before.eventType === 'os_ruling_pending_primary' &&
+    scoringLog.entries[0].after.eventType === 'single',
+    'server: scoring log keeps both wordings and the resolved status across writes');
+  /* Two independent stores: the scoring log has no feed-log-only fields. */
+  ok(!('order' in scoringLog) && !('snapshots' in scoringLog) &&
+    !('irregularities' in scoringLog) && !('settled' in scoringLog),
+    'server: scoring log is its own store, not the alert feed shape');
+  const scoringBad = await req('GET', '/api/scoring-log?date=notadate');
+  ok(scoringBad.status === 400, 'server: /api/scoring-log rejects a bad date');
   const zeroMergeA = await req('POST', '/api/feed-log', JSON.stringify({
     v: 1, date: '2024-06-01', entries: [{ gamePk: 824638, kind: 'review', review: { atBatIndex: 0, outcome: 'Stands' } }],
   }));
@@ -82,6 +128,7 @@ try {
     'server: POST /api/feed-log preserves atBatIndex 0 distinct from empty');
   // clean up the test artifact the POST wrote
   fs.rmSync(path.join(ROOT, 'data', 'feed-log-2024-06-01.json'), { force: true });
+  fs.rmSync(path.join(ROOT, 'data', 'scoring-log-2024-06-01.json'), { force: true });
   fs.rmSync(path.join(ROOT, 'data', 'feed-log-index.json'), { force: true });
   try { fs.rmdirSync(path.join(ROOT, 'data')); } catch { /* data/ pre-existed */ }
 } catch (e) {

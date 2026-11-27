@@ -1,0 +1,1343 @@
+{
+  "_provenance": {
+    "source": "GET https://statsapi.mlb.com/api/v1.1/game/824638/feed/live?timecode=20260828_203856&fields=<FEED_FIELDS>",
+    "fetched": "2026-11-27",
+    "note": "Copied verbatim from the official response, trimmed to the fields the capture reads; the linescore slice came from the same request in a second call. Descriptions keep MLB's wording (accents normalised to ASCII in this fixture only). The running score is the official linescore.teams value (9-3): play.result carries the score as of that at-bat, which is NOT the running score.",
+    "linescore_source": "GET .../feed/live?timecode=20260828_203856&fields=liveData,linescore,teams,away,home,runs,hits,errors,leftOnBase,currentInning,currentInningOrdinal,inningState,balls,strikes,outs,isTopInning,metaData,timeStamp"
+  },
+  "metaData": {
+    "wait": 10,
+    "timeStamp": "20260828_203856",
+    "gameEvents": [
+      "hit_into_play_no_out"
+    ],
+    "logicalEvents": [
+      "countChange",
+      "count11",
+      "newLeftHandedHit"
+    ]
+  },
+  "gameData": {
+    "game": {
+      "pk": 824638,
+      "id": "2026/08/28/cinmlb-chnmlb-1"
+    },
+    "datetime": {
+      "officialDate": "2026-08-28"
+    },
+    "status": {
+      "abstractGameState": "Live",
+      "codedGameState": "I",
+      "detailedState": "In Progress",
+      "statusCode": "I"
+    },
+    "teams": {
+      "away": {
+        "id": 113,
+        "name": "Cincinnati Reds",
+        "abbreviation": "CIN"
+      },
+      "home": {
+        "id": 112,
+        "name": "Chicago Cubs",
+        "abbreviation": "CHC"
+      }
+    },
+    "review": {
+      "hasChallenges": false,
+      "away": {
+        "used": 0,
+        "remaining": 1
+      },
+      "home": {
+        "used": 0,
+        "remaining": 1
+      }
+    },
+    "absChallenges": {
+      "hasChallenges": true,
+      "away": {
+        "usedSuccessful": 2,
+        "usedFailed": 0,
+        "remaining": 2
+      },
+      "home": {
+        "usedSuccessful": 3,
+        "usedFailed": 0,
+        "remaining": 2
+      }
+    }
+  },
+  "liveData": {
+    "plays": {
+      "allPlays": [
+        {
+          "result": {
+            "eventType": "walk",
+            "description": "Dane Myers walks.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 0,
+            "halfInning": "top",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 4,
+            "strikes": 1,
+            "outs": 0
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Dane Myers"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 0
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Elly De La Cruz strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 1,
+            "halfInning": "top",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 3,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Elly De La Cruz"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 1
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Sal Stewart strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 2,
+            "halfInning": "top",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 3,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Sal Stewart"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 2
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Tyler Stephenson singles on a ground ball to third baseman Alex Bregman. Dane Myers to 2nd.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 3,
+            "halfInning": "top",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Tyler Stephenson"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 3
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Eugenio Suarez strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 4,
+            "halfInning": "top",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 3,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Eugenio Suarez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 4
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Pete Crow-Armstrong strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 5,
+            "halfInning": "bottom",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 3,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Pete Crow-Armstrong"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 5
+        },
+        {
+          "result": {
+            "eventType": "double",
+            "description": "Seiya Suzuki doubles (27) on a sharp line drive to left fielder JJ Bleday.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 6,
+            "halfInning": "bottom",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Seiya Suzuki"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 6
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Michael Busch lines out to center fielder Dane Myers.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 0,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 7,
+            "halfInning": "bottom",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Michael Busch"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 7
+        },
+        {
+          "result": {
+            "eventType": "double",
+            "description": "Alex Bregman doubles (25) on a line drive to right fielder Hector Rodriguez. Seiya Suzuki scores.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 8,
+            "halfInning": "bottom",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Alex Bregman"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 8
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Ian Happ strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 9,
+            "halfInning": "bottom",
+            "inning": 1,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 3,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Ian Happ"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 9
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "JJ Bleday lines out sharply to first baseman Michael Busch.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 10,
+            "halfInning": "top",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 1,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "JJ Bleday"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 10
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Matt McLain pops out to shortstop Nico Hoerner.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 11,
+            "halfInning": "top",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 0,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Matt McLain"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 11
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Jose Trevino singles on a line drive to left fielder Ian Happ.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 12,
+            "halfInning": "top",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 1,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Jose Trevino"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 12
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Hector Rodriguez grounds out, second baseman Pedro Ramirez to first baseman Michael Busch.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 13,
+            "halfInning": "top",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 0,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Hector Rodriguez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 13
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Nico Hoerner singles on a ground ball to left fielder JJ Bleday.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 14,
+            "halfInning": "bottom",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 1,
+            "outs": 0
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Nico Hoerner"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 14
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Pedro Ramirez flies out to left fielder JJ Bleday.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 15,
+            "halfInning": "bottom",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Pedro Ramirez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 15
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Michael Conforto flies out to left fielder JJ Bleday.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 16,
+            "halfInning": "bottom",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Michael Conforto"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 16
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Carson Kelly flies out to shortstop Elly De La Cruz in foul territory.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 17,
+            "halfInning": "bottom",
+            "inning": 2,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 1,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Carson Kelly"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 17
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Dane Myers grounds out to first baseman Michael Busch.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 18,
+            "halfInning": "top",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 1,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Dane Myers"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 18
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Elly De La Cruz singles on a line drive to center fielder Pete Crow-Armstrong.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 19,
+            "halfInning": "top",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 0,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Elly De La Cruz"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 19
+        },
+        {
+          "result": {
+            "eventType": "walk",
+            "description": "Sal Stewart walks. Elly De La Cruz to 2nd.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 20,
+            "halfInning": "top",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 4,
+            "strikes": 1,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Sal Stewart"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 20
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Tyler Stephenson strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 21,
+            "halfInning": "top",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 3,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Tyler Stephenson"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 21
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Eugenio Suarez strikes out swinging.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 22,
+            "halfInning": "top",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 3,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Eugenio Suarez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 22
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Pete Crow-Armstrong singles on a ground ball to right fielder Hector Rodriguez.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 23,
+            "halfInning": "bottom",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 0,
+            "outs": 0
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Pete Crow-Armstrong"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 23
+        },
+        {
+          "result": {
+            "eventType": "force_out",
+            "description": "Seiya Suzuki pops into a force out, first baseman Sal Stewart to second baseman Matt McLain. Pete Crow-Armstrong out at 2nd. Seiya Suzuki to 1st.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 1,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 24,
+            "halfInning": "bottom",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Seiya Suzuki"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 24
+        },
+        {
+          "result": {
+            "eventType": "home_run",
+            "description": "Michael Busch homers (17) on a fly ball to right field. Seiya Suzuki scores.",
+            "rbi": 2,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 25,
+            "halfInning": "bottom",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 1,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Michael Busch"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 25
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Alex Bregman grounds out, third baseman Eugenio Suarez to first baseman Sal Stewart.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 26,
+            "halfInning": "bottom",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Alex Bregman"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 26
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Ian Happ called out on strikes.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 27,
+            "halfInning": "bottom",
+            "inning": 3,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 3,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Ian Happ"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 27
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "JJ Bleday singles on a line drive to center fielder Pete Crow-Armstrong.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 28,
+            "halfInning": "top",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 2,
+            "outs": 0
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "JJ Bleday"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 28
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Matt McLain grounds out, third baseman Alex Bregman to first baseman Michael Busch.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 29,
+            "halfInning": "top",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 1,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Matt McLain"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 29
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Jose Trevino grounds out, shortstop Nico Hoerner to first baseman Michael Busch. JJ Bleday to 3rd.",
+            "rbi": 0,
+            "awayScore": 0,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 30,
+            "halfInning": "top",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 1,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Jose Trevino"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 30
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Hector Rodriguez singles on a line drive to center fielder Pete Crow-Armstrong. JJ Bleday scores.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 31,
+            "halfInning": "top",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 2,
+            "strikes": 2,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Hector Rodriguez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 31
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Dane Myers lines out to left fielder Ian Happ.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 32,
+            "halfInning": "top",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 2,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Dane Myers"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "David Peterson"
+            }
+          },
+          "atBatIndex": 32
+        },
+        {
+          "result": {
+            "eventType": "single",
+            "description": "Nico Hoerner singles on a line drive to center fielder Dane Myers.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": false
+          },
+          "about": {
+            "atBatIndex": 33,
+            "halfInning": "bottom",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 0,
+            "outs": 0
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Nico Hoerner"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 33
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Pedro Ramirez flies out to right fielder Hector Rodriguez.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 34,
+            "halfInning": "bottom",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 0,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Pedro Ramirez"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 34
+        },
+        {
+          "result": {
+            "eventType": "strikeout",
+            "description": "Michael Conforto strikes out swinging.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 35,
+            "halfInning": "bottom",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 3,
+            "strikes": 3,
+            "outs": 2
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Michael Conforto"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 35
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Carson Kelly flies out to left fielder JJ Bleday.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 36,
+            "halfInning": "bottom",
+            "inning": 4,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 1,
+            "strikes": 2,
+            "outs": 3
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Carson Kelly"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 36
+        },
+        {
+          "result": {
+            "eventType": "field_out",
+            "description": "Elly De La Cruz grounds out, third baseman Alex Bregman to first baseman Michael Busch.",
+            "rbi": 1,
+            "awayScore": 1,
+            "homeScore": 3,
+            "isOut": true
+          },
+          "about": {
+            "atBatIndex": 37,
+            "halfInning": "top",
+            "inning": 5,
+            "isComplete": true
+          },
+          "count": {
+            "balls": 0,
+            "strikes": 0,
+            "outs": 1
+          },
+          "matchup": {
+            "batter": {
+              "id": 1,
+              "fullName": "Elly De La Cruz"
+            },
+            "pitcher": {
+              "id": 2,
+              "fullName": "Rhett Lowder"
+            }
+          },
+          "atBatIndex": 37
+        }
+      ],
+      "currentPlay": null
+    },
+    "linescore": {
+      "currentInning": 7,
+      "currentInningOrdinal": "7th",
+      "inningState": "Bottom",
+      "teams": {
+        "home": {
+          "runs": 3,
+          "hits": 6,
+          "errors": 2,
+          "leftOnBase": 3
+        },
+        "away": {
+          "runs": 9,
+          "hits": 12,
+          "errors": 0,
+          "leftOnBase": 9
+        }
+      },
+      "isTopInning": false,
+      "offense": {
+        "batter": {
+          "id": 691718,
+          "fullName": "Pete Crow-Armstrong"
+        },
+        "onDeck": {
+          "id": 673548,
+          "fullName": "Seiya Suzuki"
+        },
+        "inHole": {
+          "id": 683737,
+          "fullName": "Michael Busch"
+        },
+        "first": {
+          "id": 691718,
+          "fullName": "Pete Crow-Armstrong"
+        },
+        "third": {
+          "id": 608348,
+          "fullName": "Carson Kelly"
+        },
+        "pitcher": {
+          "id": 650644,
+          "fullName": "Aaron Civale"
+        }
+      },
+      "balls": 1,
+      "strikes": 1,
+      "outs": 2
+    }
+  }
+}

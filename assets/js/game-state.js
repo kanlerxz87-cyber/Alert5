@@ -140,6 +140,7 @@
     var homeTeam = teams.home || {};
 
     var offense = ls.offense || {};
+    var defense = ls.defense || {};
     var review = Reviews.statusReview(status);
 
     var completePlays = 0;
@@ -202,7 +203,10 @@
         third: base(offense.third),
       },
       batter: person(offense.batter) || person(cur && cur.matchup && cur.matchup.batter),
-      pitcher: person(offense.pitcher) || person(cur && cur.matchup && cur.matchup.pitcher),
+      /* `linescore.offense.pitcher` is available live; a finished/archived
+       * snapshot only carries `linescore.defense.pitcher`.  Both are official —
+       * do not fall back to the batting matchup, that is the OTHER pitcher. */
+      pitcher: person(offense.pitcher) || person(defense.pitcher) || null,
       onDeck: person(offense.onDeck),
       inHole: person(offense.inHole),
 

@@ -243,7 +243,12 @@ const FEED_823109 = {
         batter: { id: 660271, fullName: 'Test Batter' },
         onDeck: { id: 665742, fullName: 'On Deck Guy' },
         inHole: { id: 669288, fullName: 'In Hole Guy' },
-        first: { id: 621566 }, second: null, third: { id: 641487 },
+        first: { id: 621566, fullName: 'Runner On First' },
+        second: null,
+        third: { id: 641487, fullName: 'Runner On Third' },
+        /* live feeds publish the pitcher inside offense; archived ones inside
+         * defense — both official, verified 2026-11-27 */
+        pitcher: { id: 592789, fullName: 'Test Pitcher' },
       },
       innings: Array.from({ length: 8 }, (_, i) => ({
         num: i + 1,
@@ -1220,9 +1225,13 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
       'observed classifications must be archived in the feed log, not only in memory');
     feed.liveData.plays.allPlays[0].result.eventType = 'field_error';
     feed.liveData.plays.allPlays[0].result.description = 'Reached on error.';
-    /* A refresh throws the in-memory copy away; the archive in the feed's own
-     * store is what makes the comparison possible afterwards. */
+    /* A refresh throws the in-memory copy away; the archive inside the feed's
+     * own store is what makes the comparison possible afterwards. */
     mst.snapshots = {};
+    /* The play log is re-read on its own slow cadence (every 3 min), which is
+     * what catches a scorer's change after the play left the screen.  Simulate
+     * that cadence elapsing rather than waiting for it. */
+    Object.keys(mst.playCache).forEach((pk) => { mst.playCache[pk].fetchedAt = 0; });
     mst.lastChimeAt = 0;
     mst.soundOn = true;
     mutDom.window.ReplayFeed.scan();

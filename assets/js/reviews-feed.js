@@ -124,7 +124,12 @@
     slateInFlight: false,
     probesInFlight: 0,
     capturing: Object.create(null),
-    net: { lastProbeRttMs: null, lastCaptureRttMs: null, lastLatencyMs: null, lastApiTimeStamp: null, probes: 0, captures: 0, skipped: 0 },
+    net: {
+      lastProbeRttMs: null, lastCaptureRttMs: null, lastLatencyMs: null,
+      lastApiTimeStamp: null, probes: 0, captures: 0, skipped: 0,
+      playLogFetches: 0,
+    },
+    playCache: Object.create(null),
     /* scoring log (separate store) */
     scoring: null,
     scoringFilter: 'all',
@@ -407,31 +412,17 @@
 
   /* ------------------------------------------------------------- one capture */
 
-  /* fetchGame(game) -> { game, payload, rttMs, error }
-   * One projected feed/live request per game carries the whole captured state
-   * (plays, review details, counters, official timestamp) — the same request
-   * the feed already made for review parsing. */
-  function fetchGame(game) {
-    var started = Date.now();
-    return MLB.gameFeedCapture(game.gamePk, { fields: MLB.FEED_FIELDS })
-      .then(function (payload) {
-        return { game: game, payload: payload, rttMs: Date.now() - started };
-      })
-      .catch(function (err) {
-        /* Older games only answer the v1 path; retry once there before giving
-         * up, so a capture gap is never mistaken for "nothing happened". */
-        if (err && (err.status === 404 || err.status === 400)) {
-          var url = MLB.API_ROOT + '/v1/game/' + game.gamePk + '/feed/live?fields=' + encodeURIComponent(MLB.FEED_FIELDS);
-          return MLB.getJSON(url, { retries: 0 }).then(function (payload) {
-            return { game: game, payload: payload, rttMs: Date.now() - started, fellBackToV1: true };
-          }).catch(function (err2) {
-            return { game: game, payload: null, rttMs: Date.now() - started, error: err2 };
-          });
-        }
-        return { game: game, payload: null, rttMs: Date.now() - started, error: err };
-      });
-  }
-
+  /**
+   * fetchState(game) — ONE request, the live state (~1.7 KB projected).
+   *
+   * This is the only request the fast path makes.  It carries the official
+   * clock, the running state and the current at-bat, which is everything the
+   * alert layer needs; the play LOG is fetched separately (fetchPlayLog) and
+   * only to seed the official-scoring baseline and to diff completed at-bats.
+   */
+  /* Bounded concurrency: never more than `limit` requests in flight, so a
+   * fifteen-game slate cannot open fifteen sockets at once and the browser's
+   * per-host connection budget is respected. */
   function runLimited(items, limit, worker) {
     var index = 0;
     var active = 0;
@@ -446,6 +437,9 @@
           worker(item).then(function () {
             active -= 1;
             next();
+          }, function () {
+            active -= 1;
+            next();
           });
         }
       }
@@ -453,37 +447,41 @@
     });
   }
 
-  /* ------------------------------------------------------- the alert bridge */
-
-  function chime(kind) {
-    if (!state.soundOn) return false;
-    var now = Date.now();
-    if (now - state.lastChimeAt < SOUND_COOLDOWN_MS) return false;
-    state.lastChimeAt = now;
-    if (AlertSound) AlertSound.play(kind || 'alert');
-    return true;
+  function fetchState(game) {
+    var started = Date.now();
+    return MLB.gameStateCapture(game.gamePk)
+      .then(function (payload) {
+        return { game: game, payload: payload, rttMs: Date.now() - started };
+      })
+      .catch(function (err) {
+        /* v1.1 answers everything current; the v1 path is the documented
+         * fallback and costs one extra request only when v1.1 refuses. */
+        if (err && (err.status === 404 || err.status === 400)) {
+          var url = MLB.API_ROOT + '/v1/game/' + game.gamePk + '/feed/live?fields=' + encodeURIComponent(MLB.STATE_FIELDS);
+          return MLB.getJSON(url, { retries: 0 }).then(function (payload) {
+            return { game: game, payload: payload, rttMs: Date.now() - started, fellBackToV1: true };
+          }).catch(function (err2) {
+            return { game: game, payload: null, rttMs: Date.now() - started, error: err2 };
+          });
+        }
+        return { game: game, payload: null, rttMs: Date.now() - started, error: err };
+      });
   }
-
-  function notifyRunAtRisk(review, teams) {
-    if (!state.notifyOn) return;
-    if (typeof global.Notification !== 'function') return;
-    if (global.Notification.permission !== 'granted') return;
-    try {
-      var title = '⚠️ Run at risk — ' + UI.abbr(teams.away) + ' @ ' + UI.abbr(teams.home);
-      var body = review.typeLabel + (review.reason ? ' (' + review.reason + ')' : '') +
-        ' · ' + review.inningLabel + ' — ' + review.runsAtRiskCount + ' run(s) credited to the reviewed play.';
-      new global.Notification(title, { body: body, tag: review.id });
-    } catch (e) { /* ignore */ }
-  }
-
-  /* ------------------------------------------------------------ capture ingest */
 
   /**
-   * ingestCapture(result, seq, date)
-   *   The single entry point for a fresh official payload: capture the state,
-   *   diff it against the previous capture, raise rows/alerts, and hand the
-   *   ruling-related changes to the separate scoring log.
+   * fetchPlayLog(game) — the official play log, fetched when the scoring
+   * baseline needs establishing and then at most once per few seconds while an
+   * at-bat is pending.  Keeping this off the fast path is what lets the state
+   * poll run every 250 ms without moving megabytes.
    */
+  function fetchPlayLog(game) {
+    return MLB.gameFeedCapture(game.gamePk, { fields: MLB.FEED_FIELDS })
+      .then(function (payload) { return { game: game, payload: payload }; })
+      .catch(function (err) {
+        return { game: game, payload: null, error: err };
+      });
+  }
+
   function ingestCapture(result, expectedSeq, expectedDate) {
     if (expectedSeq !== undefined && expectedSeq !== state.dateSeq) return;
     if (expectedDate !== undefined && expectedDate !== state.date) return;
@@ -579,8 +577,29 @@
       else if (c.kind === 'score') chime('state');
     });
 
-    /* ---- reviews (unchanged semantics, same parser, same payload) ---- */
-    var plays = Reviews.playsOf(result.payload);
+    /* ---- play log: seeded once, refreshed on its own slow cadence ---- */
+    var cache = playCacheOf(pk);
+    var plays = cache.plays && cache.plays.length
+      ? cache.plays
+      : Reviews.playsOf(result.payload);   /* a whole-feed payload still carries it */
+
+    /* A ruling is pending → the play log has to stay close behind the state. */
+    cache.pending = Reviews.pendingRulings(plays, { gamePk: pk }).length > 0;
+
+    /* Cheap signals that the play LOG must have moved even though the fast
+     * state payload does not carry it: a new at-bat, a completed at-bat, or a
+     * review/status code.  Any of these puts the log re-read on its short
+     * cadence instead of the three-minute sweep. */
+    var atBatNow = snap.atBat && snap.atBat.index !== undefined ? snap.atBat.index : null;
+    var statusNow = snap.status && snap.status.statusCode ? String(snap.status.statusCode) : '';
+    if (cache.atBatSeen !== atBatNow || cache.statusSeen !== statusNow ||
+        (snap.atBat && snap.atBat.isComplete)) {
+      cache.dirty = true;
+    }
+    cache.atBatSeen = atBatNow;
+    cache.statusSeen = statusNow;
+    maybeFetchPlayLog(game, snap, cache.fetchedAt ? 'refresh' : 'seed');
+
     var meta = { gamePk: pk, teams: teams, feed: result.payload };
     var reviews = Reviews.extractReviews(plays, meta);
     reviews.forEach(function (review) {
@@ -672,6 +691,152 @@
       awayAbbr: UI.abbr(teams.away),
       homeAbbr: UI.abbr(teams.home),
     };
+  }
+
+  /* ------------------------------------------------------- play-log seeds
+   * The live state is captured every 250 ms from the projected STATE payload.
+   * That payload carries the running state and the CURRENT at-bat but not the
+   * historical play log, which two things need:
+   *
+   *   · review rows (a review is recorded on the at-bat it happened in)
+   *   · the official-scoring baseline + reclassification diff
+   *
+   * So the play log is fetched on its own, much slower cadence, and merged:
+   *   seed    one full play-log read per game, on its first capture
+   *   top-up  re-read only when the official status says a review is open, or
+   *           when an at-bat is awaiting an official ruling
+   *   sweep   one bounded re-read per game every few minutes, which is what
+   *           catches a scoring change made after the play left the screen
+   *
+   * Cache is per game, bounded, and independent of the state path: if a
+   * play-log read fails, the state capture and its alerts are unaffected.
+   */
+  var PLAYLOG_SWEEP_MS = 180000;     /* re-read every 3 min per game              */
+  var PLAYLOG_PENDING_MS = 4000;     /* … 4 s while a ruling is pending/under review */
+  var PLAYLOG_MIN_GAP_MS = 2500;     /* never two reads of one game closer than this */
+
+  function playCacheOf(pk) {
+    var key = String(pk);
+    if (!state.playCache) state.playCache = Object.create(null);
+    if (!state.playCache[key]) {
+      state.playCache[key] = {
+        plays: [], fetchedAt: 0, atBatIndex: null, pending: false,
+        epoch: 0, inFlight: false, lastError: null,
+      };
+    }
+    return state.playCache[key];
+  }
+
+  function maybeFetchPlayLog(game, snap, reason) {
+    var pk = game.gamePk;
+    var cache = playCacheOf(pk);
+    if (cache.inFlight) return null;
+    var now = Date.now();
+    var since = now - (cache.fetchedAt || 0);
+    var hot = !!cache.pending || !!(snap && snap.review) ||
+      (snap && snap.status && /^(M|N|IH)/i.test(String(snap.status.statusCode || '')));
+    var cadence = hot ? PLAYLOG_PENDING_MS : PLAYLOG_SWEEP_MS;
+    var floor = cache.dirty ? PLAYLOG_MIN_GAP_MS : cadence;
+    if (cache.fetchedAt && since < Math.max(PLAYLOG_MIN_GAP_MS, floor)) return null;
+    if (!cache.fetchedAt && reason !== 'seed') return null;
+
+    cache.inFlight = true;
+    var epoch = cache.epoch;
+    return fetchPlayLog(game).then(function (result) {
+      cache.inFlight = false;
+      if (!result || !result.payload) {
+        cache.lastError = (result && result.error && result.error.message) || 'play-log read failed';
+        return;
+      }
+      if (epoch !== cache.epoch) return;          /* date/game switched underneath */
+      cache.lastError = null;
+      cache.plays = Reviews.playsOf(result.payload);
+      cache.fetchedAt = Date.now();
+      cache.dirty = false;
+      var last = null;
+      for (var i = cache.plays.length - 1; i >= 0; i -= 1) {
+        var p = cache.plays[i];
+        if (p && p.about && p.about.atBatIndex !== undefined) { last = p; break; }
+      }
+      cache.atBatIndex = last && last.about ? Number(last.about.atBatIndex) : null;
+      cache.pending = !!(last && last.result &&
+        /^os_ruling_pending/.test(String(last.result.eventType || '')));
+      state.net.playLogFetches += 1;
+      ingestPlayLog(result.game, result.payload, snap, 'playlog');
+      persist(state.dateSeq, state.date);
+      renderIfChanged();
+      updateChrome();
+    }).catch(function (err) {
+      cache.inFlight = false;
+      cache.lastError = (err && err.message) || 'play-log read failed';
+    });
+  }
+
+  /**
+   * ingestPlayLog(game, payload, snap) — the play log has changed under us, so
+   * run the parts of the ingest that need it.  Everything here is idempotent:
+   * the review rows are upserted by their own id and the scoring log merges on
+   * its own key, so a re-read never duplicates a row or re-fires an alert.
+   */
+  function ingestPlayLog(game, payload, snap, reason) {
+    var pk = game.gamePk;
+    if (state.dateSeq === undefined) return;
+    var plays = Reviews.playsOf(payload);
+    if (!plays.length) return;
+    var node = state.capture[String(pk)];
+    var teams = (node && node.teams) ||
+      (snap && snap.teams && { away: snap.teams.away, home: snap.teams.home }) || teamsOf(game);
+    var label = (node && node.matchupLabel) || matchupLabel(teams);
+    var meta = { gamePk: pk, teams: teams, feed: payload };
+    var effective = snap || (node && node.snap) || null;
+
+    /* Reviews: re-derived from the fresh play log.  Uses the same parser and
+     * the same entry keys as before, so this is a refresh, not a new source. */
+    var reviews = Reviews.extractReviews(plays, meta);
+    reviews.forEach(function (review) {
+      var existing = state.entries.find(function (e) { return e.id === review.id; });
+      var before = existing && existing.scoreTracker && existing.scoreTracker.before
+        ? existing.scoreTracker.before : null;
+      var scoreTracker = { before: before, possible: null, actual: null };
+      if (review.inProgress) {
+        if (scoreTracker.before && review.runsAtRiskCount > 0) {
+          scoreTracker.possible = { away: scoreTracker.before.away, home: scoreTracker.before.home };
+          scoreTracker.possible[review.battingSide] = Math.max(0,
+            scoreTracker.possible[review.battingSide] - review.runsAtRiskCount);
+        }
+      }
+      var openStatus = existing && existing.openStatus ? existing.openStatus : null;
+      var openStatusNow = review.inProgress
+        ? { statusCode: effective.status.statusCode, detailedState: effective.status.detailedState, reason: effective.status.reason, apiTimeStamp: effective.apiTimeStamp }
+        : openStatus;
+      var resolvedStatus = review.inProgress ? null
+        : { statusCode: effective.status.statusCode, detailedState: effective.status.detailedState, reason: effective.status.reason, apiTimeStamp: effective.apiTimeStamp };
+      var entry = {
+        id: review.id,
+        kind: 'review',
+        gamePk: pk,
+        matchupLabel: label,
+        teams: teams,
+        officialDate: effective.officialDate || (payload.gameData && payload.gameData.datetime && payload.gameData.datetime.officialDate) || null,
+        review: review,
+        scoreTracker: scoreTracker,
+        openStatus: openStatusNow,
+        resolvedStatus: resolvedStatus,
+        firstSeenLabel: MLB.formatGameTime(game.gameDate),
+        apiTimeStamp: effective.apiTimeStamp,
+        latencyMs: effective.latencyMs,
+      };
+      var created = upsertEntry(entry);
+      if (!created) return;
+      /* Same discipline as the state path: an alert for a row that was not
+       * on screen before, once.  ABS pitch challenges stay silent. */
+      if (!review.isABS) chime(review.runsAtRiskCount > 0 ? 'risk' : 'review');
+      else if (review.runsAtRiskCount > 0) chime('risk');
+    });
+
+    /* Official scoring: pending rulings + reclassifications. */
+    ingestScoring(game, plays, meta, effective, label, teams);
+    void reason;
   }
 
   /* ------------------------------------------------- observation archive
@@ -1043,7 +1208,7 @@
            * request and race two ingests of the same state. */
           if (state.capturing[game.gamePk]) return Promise.resolve();
           state.capturing[game.gamePk] = true;
-          return fetchGame(game).then(function (result) {
+          return fetchState(game).then(function (result) {
             state.capturing[game.gamePk] = false;
             ingestCapture(result, scanSeq, scanDate);
           });
@@ -1114,7 +1279,7 @@
     var pk = game.gamePk;
     if (state.capturing[pk]) return;
     state.capturing[pk] = true;
-    fetchGame(game).then(function (result) {
+    fetchState(game).then(function (result) {
       state.capturing[pk] = false;
       if (seq !== state.dateSeq || date !== state.date) return;
       result.reason = reason;
@@ -1132,10 +1297,13 @@
    *
    * Two ways to stay current, chosen per game per tick:
    *
-   *  DIRECT  a full projected capture, one round trip.  Used while the game is
+   *  DIRECT  the projected live state, one round trip (~1.7 KB).  Used while the game is
    *          visibly moving (`node.burstUntil`), while it is in a review or has
    *          an open ruling, and for the very first capture.  This is the
    *          shortest possible path to a new event: capture interval + RTT.
+   *          Measured cost on a 7th-inning snapshot: ~1.7 KB, against ~16 KB
+   *          for the same game's whole feed — the play log is simply not part
+   *          of the fast path.
    *  PROBE   a 150-byte change probe whenever the game has gone quiet; only a
    *          moved official timestamp is followed by a capture.  This keeps a
    *          fifteen-game slate from pulling megabytes a second while nothing
@@ -1225,6 +1393,33 @@
   }
 
   /* ------------------------------------------------------------- sound/notify */
+
+  var SOUND_COOLDOWN_MS = 1200;
+
+  /* Every alert in the feed goes through here — nothing reaches the speaker
+   * except from a row the operator can also see.  The audio engine has its own
+   * 1.2 s coalescing; this one keeps `state.lastChimeAt` meaningful for the
+   * "did it fire?" checks and for the latency chip. */
+  function chime(kind) {
+    if (!state.soundOn) return false;
+    var now = Date.now();
+    if (now - state.lastChimeAt < SOUND_COOLDOWN_MS) return false;
+    state.lastChimeAt = now;
+    if (global.AlertSound) global.AlertSound.play(kind || 'alert');
+    return true;
+  }
+
+  function notifyRunAtRisk(review, teams) {
+    if (!state.notifyOn) return;
+    if (typeof global.Notification !== 'function') return;
+    if (global.Notification.permission !== 'granted') return;
+    try {
+      var title = '⚠️ Run at risk — ' + UI.abbr(teams.away) + ' @ ' + UI.abbr(teams.home);
+      var body = review.typeLabel + (review.reason ? ' (' + review.reason + ')' : '') +
+        ' · ' + review.inningLabel + ' — ' + review.runsAtRiskCount + ' run(s) credited to the reviewed play.';
+      new global.Notification(title, { body: body, tag: review.id });
+    } catch (e) { /* ignore */ }
+  }
 
   function loadPref(key, fallback) {
     try {
@@ -1586,6 +1781,8 @@
     if (n.lastLatencyMs !== null) bits.push('API clock lag ' + n.lastLatencyMs + ' ms');
     if (n.lastProbeRttMs !== null) bits.push('probe ' + n.lastProbeRttMs + ' ms');
     if (n.lastCaptureRttMs !== null) bits.push('capture ' + n.lastCaptureRttMs + ' ms');
+    if (n.captures) bits.push(n.captures + ' capture' + (n.captures === 1 ? '' : 's'));
+    if (n.probes) bits.push(n.probes + ' probe' + (n.probes === 1 ? '' : 's'));
     if (!bits.length) return '';
     return '<span class="latency-chip" title="API clock lag = browser clock at capture minus the payload\'s own metaData.timeStamp. Probe = the 250 ms change probe round trip. Capture = the full-state request round trip. These are measured, not estimated.">' +
       UI.esc(bits.join(' · ')) + '</span>';
@@ -1732,6 +1929,20 @@
           ? '<div class="state-clock">API clock ' + UI.esc(entry.firstSeenApiTimeStamp || '—') +
             (after.apiTimeStamp ? ' → ' + UI.esc(after.apiTimeStamp) : '') +
             (Number.isFinite(entry.resolutionLagMs) ? ' · resolved ' + MLB.formatClock(entry.resolutionLagMs) + ' after we first saw it' : '') + '</div>'
+          : '') +
+        (entry.verified
+          ? '<div class="feed-irregular">' +
+            (entry.verified.error
+              ? 'Re-read at ' + UI.esc(entry.verified.requestedTimecode) + ' failed: ' + UI.esc(entry.verified.error)
+              : 'Re-read at ' + UI.esc(entry.verified.requestedTimecode) +
+                (entry.verified.answeredTimecode && entry.verified.answeredTimecode !== entry.verified.requestedTimecode
+                  ? ' (API answered with ' + UI.esc(entry.verified.answeredTimecode) + ')' : '') +
+                ' — ' + UI.esc(entry.verified.note || '') +
+                (entry.verified.official
+                  ? ' Official wording then: “' + UI.esc(entry.verified.official.description || entry.verified.official.eventType || '') +
+                    '”' + (entry.verified.official.eventType ? ' (' + UI.esc(entry.verified.official.eventType) + ')' : '')
+                  : '')) +
+            '</div>'
           : '') +
         (entry.attribution ? '<div class="feed-irregular">' + UI.esc(entry.attribution) + '</div>' : '') +
         ((entry.notes || []).length ? '<ul class="scoring-notes">' + entry.notes.map(function (n) {
@@ -1955,6 +2166,12 @@
     state.games = [];
     state.entries = [];
     state.snapshots = Object.create(null);
+    /* Play-log cache is keyed by gamePk, not date, so it can stay across a
+     * date switch — but any read in flight belongs to the old slate. */
+    Object.keys(state.playCache || {}).forEach(function (pk) {
+      var c = state.playCache[pk];
+      if (c) { c.epoch += 1; c.inFlight = false; }
+    });
     state.irregularities = Object.create(null);
     state.finalSeen = Object.create(null);
     state.nextDue = Object.create(null);
@@ -2174,6 +2391,8 @@
     PROBE_MS_HOT: PROBE_MS_HOT,
     CAPTURE_FLOOR_MS: CAPTURE_FLOOR_MS,
     CAPTURE_BURST_MS: CAPTURE_BURST_MS,
+    PLAYLOG_SWEEP_MS: PLAYLOG_SWEEP_MS,
+    PLAYLOG_MIN_GAP_MS: PLAYLOG_MIN_GAP_MS,
     CAPTURE_HOT_MS: CAPTURE_HOT_MS,
     SCAN_MS: PROBE_MS,
     STATUS_SWEEP_MS: STATUS_SWEEP_MS,

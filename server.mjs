@@ -396,7 +396,16 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  /* A malformed request target (a proxy-ed `//`, an absolute-form request, a
+   * bracketed host) must never take the process down: answer 400 and keep
+   * serving.  Verified by tools/restoration-check.mjs. */
+  let reqUrl;
+  try {
+    reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  } catch (_) {
+    sendError(res, 400, 'Bad request');
+    return;
+  }
   const pathname = reqUrl.pathname;
 
   // --- API Endpoints ---

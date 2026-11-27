@@ -434,7 +434,7 @@ GitHub Actions**.
   degrades gracefully if a field disappears.
 - **Terms & budget:** the binding rules for this data, the request rate of every
   polling surface, and the code paths that enforce them are written down in
-  `docs/api-compliance.md` *(not part of the upload — see F-003 on [`flagged.html`](flagged.html))* — including the two clauses
+  [`docs/api-compliance.md`](docs/api-compliance.md) — including the two clauses
   that pull in different directions (the API's own notice permits "individual,
   non-commercial, non-bulk use"; MLB.com's Terms of Use §1 forbids automated
   collection and any display beyond personal, non-commercial home use) and the
@@ -447,20 +447,29 @@ GitHub Actions**.
   (the server's own `Retry-After` when it sends one, clamped to 1s–5min;
   otherwise 60 seconds), so it can never hammer a host that has asked it to
   slow down. The live push is server-side (same-origin `EventSource`) and adds
-  no requests to MLB's API. The Replay Feed scans live games'
-  playByPlay (the light, `fields`-projected endpoint — no boxscore/rosters)
-  every 250ms, subtracts scan time from the next wait, fetches in-review games
-  first, and only re-renders when a review event actually changes. Worst case
-  on a full ~15-game slate that is ~60 playByPlay requests/s plus ~4 tiny
-  status sweeps/s (~68 req/s, single client, since the sweep went 250ms → 125ms)
-  — far below "thousands of requests per second", and the same cadence the page
-  already used whenever any review was in flight. The 1s post-Final tier adds
-  ~70 requests per finished game
-  across its 30-minute grace (~292 total, up from ~220) — bounded, and only for
-  games that have just gone final. The StatsAPI is
-  pull-only — a shorter poll only reduces how long a landed event sits unseen.
+  no requests to MLB's API.
+- **How fast the Replay Feed is, and what it costs.** The all-games feed no
+  longer polls the play-by-play log on the fast path. It captures the
+  *projected live state* instead — the official clock, running score, count,
+  outs, bases, batter, pitcher, on-deck/in-hole, the official status code and
+  the current at-bat's own `startTime`/`endTime` — which is **~1.7 KB** for the
+  snapshot measured on 2026-08-28, against **~16 KB** for that game's whole
+  feed. While a game is moving it captures every 250 ms (150 ms while a review
+  or a scoring ruling is open); once a game is quiet it makes a **150-byte
+  change probe** on the same cadence and only captures when MLB's own
+  `metaData.timeStamp` has moved. A 125 ms slate status sweep
+  (`schedule?hydrate=game(status)`, one request for all games) catches a
+  review/status code change on any game without capturing any of them. The
+  play log is read once per game to seed the official-scoring baseline, then
+  every 3 minutes — 4 seconds while a ruling is pending or a review is open —
+  because a scorer's change can land long after the play left the screen.
+  Worst case on a full ~15-game slate that is ~68 req/s (~115 KB/s) while every
+  game is simultaneously live and moving; typical load is the probe path,
+  ~60 probes/s (~9 KB/s). The 1 s post-Final tier adds ~70 requests per
+  finished game across its 30-minute grace. Full numbers, the two governing
+  clauses and the enforcing constants: `docs/api-compliance.md`.
 - This is a **personal, non-commercial project** (no ads, no analytics, no data resale — see the
-  request budget and the governing terms in `docs/api-compliance.md` *(not part of the upload — see F-003 on [`flagged.html`](flagged.html))*).
+  request budget and the governing terms in [`docs/api-compliance.md`](docs/api-compliance.md)).
   It lives in a public repository and is served from GitHub Pages; that is hosting, not a service
   offered to others.
 - Review/challenge data shapes were verified against the live API on 2026-08-19
