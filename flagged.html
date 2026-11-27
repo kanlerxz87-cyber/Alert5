@@ -49,7 +49,7 @@
         feed (localStorage + optional <code>/api/game-state</code>); a shared ~3 s raindrop alert
         sound with an on/off toggle and an always-available test button; a per-class request budget
         that bounds every poll cadence. Checks: <code>npm run test:all</code> — 26 state/log/sound/budget
-        checks plus 7 end-to-end UI checks (<code>tools/smoke-test.mjs</code> section [13b]).</li>
+        checks plus 8 end-to-end UI checks (<code>tools/smoke-test.mjs</code> section [13b]).</li>
         <li><strong>Unverified — latency:</strong> the real end-to-end delay between MLB writing an
         event and this page showing it cannot be measured from this build sandbox: direct sockets to
         <code>statsapi.mlb.com</code> are blocked here, and neither the StatsAPI nor MLB publishes a

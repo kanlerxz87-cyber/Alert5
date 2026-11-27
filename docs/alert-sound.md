@@ -81,7 +81,7 @@ that is finished before the next alert can arrive — no ringing left over, no s
 
 | Surface | Call |
 | --- | --- |
-| `reviews-feed.js` | `chime(reason)` for new reviews, runs at risk, pending rulings and scoring changes; `toggleSound()` / `testSound()` for the controls |
+| `reviews-feed.js` | `chime(reason)` for new reviews, runs at risk, pending rulings, scoring changes and material live-state transitions (score/outs/status on a game not under review); `toggleSound()` / `testSound()` for the controls |
 | `game.js` | `AlertSound.play('review')` for a review id seen for the first time on this game |
 | `scoreboard.js` | `AlertSound.play('review')` when the 125 ms status sweep sees a new review signature |
 

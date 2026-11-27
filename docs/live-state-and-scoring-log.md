@@ -64,6 +64,11 @@ The **first** capture of a game produces no rows: there is nothing to compare ag
 inventing a "before" would be inference. A row that says a value changed always contains the two
 observed values.
 
+A material transition (score, outs, official status) on a game that is **not** currently under
+review also raises the alert sound — it is a feed event in its own right. Transitions on a game that
+*is* under review stay silent: the review already alerted, and a review that stands for a minute
+must not chime on every pitch underneath it.
+
 Transitions are appended to the bucket (`transitions`, newest first, capped at 600) and the newest
 12 per game are folded into the main Replay Feed as 📡 rows. That projection is limited to the
 fields an operator acts on — score, outs, review state and official status
@@ -155,5 +160,5 @@ description containing commas or quotes round-trips into a spreadsheet unchanged
 | Check | Command |
 | --- | --- |
 | Snapshot/diff/ledger/merge, exports, the alert sound graph, the request budget and 304 revalidation | `node tests/state-log-test.mjs` (26 checks: snapshot/diff, ledger merge + resolve, ring throttle, exports, sound graph, blocked audio, budget, 304, 429) |
-| End-to-end UI: state panel, separate scoring panel, reload persistence, alert toggle, latency read-out | `node tools/smoke-test.mjs` section `[13b]` (7 checks) |
+| End-to-end UI: state panel, separate scoring panel, reload persistence, alert toggle, latency read-out | `node tools/smoke-test.mjs` section `[13b]` (8 checks) |
 | Everything | `npm run test:all` |
