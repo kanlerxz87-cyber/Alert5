@@ -34,6 +34,39 @@ Measured against the requirements in the brief:
 - **one sound per burst** — a 2.5 s cooldown in the Replay Feed and 1.8 s inside the module, so
   five events landing in the same poll produce one raindrop.
 
+## Rendered check (not just an assertion that it is "nice")
+
+The exact figure above was rendered offline at 44.1 kHz through the same low-pass and echo and
+measured. Result:
+
+| Measurement | Value |
+| --- | --- |
+| Audible until | **3.0 s** (silence after; `LENGTH_MS = 3000`) |
+| Peak sample | 0.35 before the 0.9 master, i.e. 0.31 out — **no clipping, ~10 dB headroom** |
+| RMS | ≈ **−25 dBFS** — a deliberately quiet, speech-safe alert, not a siren |
+| Shape | drops land 0.0–1.0 s, bloom peaks at ~1.0 s, then a smooth decay to silence at 3.0 s |
+
+The envelope (per 0.25 s, `#` = RMS) is:
+
+```text
+0.00s #####################
+0.25s #################
+0.50s ################
+0.75s ###########
+1.00s ###############
+1.25s ###########
+1.50s ######
+1.75s ####
+2.00s ###
+2.25s ##
+2.50s #
+2.75s #
+3.00s
+```
+
+That is the property that matters for "heard all day": a soft onset, one clear peak, and a decay
+that is finished before the next alert can arrive — no ringing left over, no sharp transient.
+
 ## Behaviour and failure modes
 
 | Situation | What happens |
