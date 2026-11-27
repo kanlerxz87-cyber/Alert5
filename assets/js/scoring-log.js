@@ -519,6 +519,8 @@
 
   global.ScoringLog = {
     VERSION: VERSION,
+    PREFIX: PREFIX,
+    SERVER_PATH: SERVER_PATH,
     KEEP_DATES: KEEP_DATES,
     MAX_ENTRIES: MAX_ENTRIES,
     empty: empty,
@@ -544,6 +546,7 @@
     closeStream: closeStream,
     readPrefs: readPrefs,
     writePrefs: writePrefs,
+    isStaticHost: isStaticHost,
     state: apiState,
   };
 }(window));

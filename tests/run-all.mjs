@@ -25,6 +25,8 @@ results.push(run('syntax: assets/js/*.js', 'bash', ['-lc', 'set -e; for f in ass
 results.push(run('link-check', process.execPath, [path.join(HERE, 'link-check.mjs')]));
 results.push(run('contract-check', process.execPath, [path.join(HERE, 'contract-check.mjs')]));
 results.push(run('game-state-test', process.execPath, [path.join(HERE, 'game-state-test.mjs')]));
+results.push(run('alert-sound-test', process.execPath, [path.join(HERE, 'alert-sound-test.mjs')]));
+results.push(run('scoring-log-test', process.execPath, [path.join(HERE, 'scoring-log-test.mjs')]));
 results.push(run('jsdom-render-test', process.execPath, [path.join(HERE, 'jsdom-render-test.mjs')]));
 results.push(run('preview-day-render-test', process.execPath, [path.join(HERE, 'preview-day-render-test.mjs')]));
 
