@@ -93,6 +93,7 @@ therefore about **confirming the API field contract** (below) rather than fillin
 | 2026-11-27 | Live state capture, diff wording, ledger merge/idempotence, exports, alert-sound graph and its blocked-audio path | `node tests/state-log-test.mjs` | **26/26 passed** |
 | 2026-11-27 | End-to-end: 📡 state panel, separate ✏️ scoring panel outside the alert feed, reload persistence of the log, alert toggle + test button, latency read-out | `node tools/smoke-test.mjs` section [13b] | **7/7 added, 74/74 total passed** |
 | 2026-11-27 | Separate state store round-trip and merge (resolved state preserved, newest baseline wins, bad date rejected, `/api/feed-log` unaffected) | `node server.mjs` on :8133 + `curl` `/api/game-state` GET/POST | Confirmed; `data/` is gitignored |
+| 2026-11-27 | Integration: PR #17 merged to `main` as `9b06139`; both CI checks passed (`test` 41s, `official-upcoming` against the real StatsAPI 6s — run `45934753029`); Pages build `45934904869` succeeded and the post-publish byte-for-byte delivery check `45934957797` passed | <https://github.com/kanlerxz87-cyber/Alert5/pull/17> · <https://github.com/kanlerxz87-cyber/Alert5/actions/runs/45934957797> | Merged 2026-11-27T03:33:55Z |
 | 2026-11-25 | Upstream's open defect **A6** (uncaught `decodeURIComponent` crash + sibling-dir containment) | `curl 'http://127.0.0.1:8102/%E0%A4%A'` against this copy | **Fixed in the copy** — 400 response, server keeps running (upstream §2 still lists A6 as open) |
 
 ---
