@@ -427,6 +427,35 @@ GitHub Actions**.
   feed fetches in parallel per scan).
 - **Team colors:** `TEAM_COLORS` in `assets/js/ui.js`.
 
+## The all-games Replay Feed (`reviews.html`)
+
+Four things it does, and where each lives:
+
+| What | Where | How it behaves |
+|---|---|---|
+| **Second-stamped official state** | `#state-section`, `assets/js/game-state.js` | Every game on the slate: score/hits/errors, inning, count, outs, bases + runner names, batter, pitcher, on-deck, in-hole, the current at-bat (with its official `startTime`/`endTime`), the official status and both challenge counters. Each card shows the API's own `metaData.timeStamp` (second precision) and how far behind that clock this page was. Every transition is kept with the wording before and after. |
+| **Alerts** | `assets/js/reviews-feed.js`, `assets/js/alert-sound.js` | Challenges, manager challenges, umpire/crew-chief reviews, boundary calls, official-scorer pending rulings and official scoring changes all reach the alert feed and the alert sound. If an active review could take a run off the board, it is a persistent banner and a popup, and the chime fires once. |
+| **Alert sound** | `assets/js/alert-sound.js` | One ~3 s raindrop figure (synthesised — no file to download). Ships **off**; `Sound Off/On` remembers your choice and `Test sound` plays it once regardless. A burst of alerts inside 1.2 s is one sound, never a stack. |
+| **Official scoring log** | `#scoring-section`, `assets/js/scoring-log.js` | Pending rulings and scoring reclassifications in their **own** section and their **own** storage, with filters, an Export JSON button, and a `Re-read official state at this timestamp` button that asks the API what it said at the exact second the row was logged. Survives a refresh; cannot delay or break an alert. |
+
+### How fast it is, and what it costs
+
+The fast path never fetches the play log. It captures the projected live state
+per game — **~1.7 KB**, measured, against ~16 KB for the same game's whole feed:
+
+- **250 ms** per live game (150 ms while a review or ruling is open), one request;
+- **~150 B change probe** on the same cadence once a game is quiet — capture
+  only when MLB's own clock has moved;
+- **125 ms** sweep of the whole slate's `statusCode`, which is what turns a
+  challenge into an alert before any play text exists;
+- the play log on its own slow cadence (seed, then every 3 min — 4 s while a
+  ruling is pending), purely for review rows and the scoring diff.
+
+The StatsAPI is pull-only, so the floor on latency is one poll interval plus one
+round trip, and the page renders the measured lag rather than claiming anything
+better. Full budget, the two governing clauses and the enforcing constants:
+[`docs/api-compliance.md`](docs/api-compliance.md).
+
 ## Notes & etiquette
 
 - The MLB StatsAPI is **unofficial and may change without notice**. The client is

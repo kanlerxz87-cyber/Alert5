@@ -184,3 +184,43 @@ Every item below was uncovered during a line-by-line audit of all HTML pages, JS
 | D7-4 | 2027 per-team `absChallenges` counters prior to first pitch | | **Unverified until 2027 live feeds:** 2027 pregame `feed/live` (`853719`) omits `absChallenges` prior to first pitch; client omits absent ABS counters rather than zero-filling. | <https://statsapi.mlb.com/api/v1.1/game/853719/feed/live> | Unverified |
 
 
+---
+
+## 9. Latency, live-state capture, alert sound & the separate scoring log — session `4e8d6970` (2026-11-27)
+
+Four workstreams shipped on this branch. Every number below is either a
+constant in the source (named) or a measurement from a response fetched during
+this session; nothing was assumed about the API shape.
+
+### 9.1 What was measured against the live API
+
+| # | Question | Finding | Source | Status |
+|---|---|---|---|---|
+| L-1 | How large is the payload the fast path needs? | The same 7th-inning snapshot of game `824638` (2026-08-28, `timecode=20260828_203856`) is **~16.5 KB** as a whole feed and **~1.7 KB** with the live-state projection (`STATE_FIELDS`), which still carries `metaData.timeStamp`, the full `linescore` (score, hits, errors, count, outs, bases, batter, pitcher, on-deck, in-hole), `statusCode`, the challenge counters and `plays.currentPlay` with its `about.startTime`/`endTime`. The 15 KB difference is `allPlays`. | `…/feed/live?timecode=20260828_203856&fields=…` (two fetches, recorded in `tests/fixtures/feed-824638-capture.json` with a `_provenance` block) | Verified |
+| L-2 | Where is the pitcher, batter and count? | `liveData.linescore.offense.{batter,pitcher,onDeck,inHole,first,second,third}` on a live snapshot; an archived/finished snapshot only carries `linescore.defense.pitcher`. `currentPlay.matchup.pitcher` is the *batting* matchup's pitcher — using it would report the wrong pitcher. | same fetch | Fixed (`game-state.js`: offense → defense, never the matchup) |
+| L-3 | Is `play.result.awayScore/homeScore` the running score? | **No.** At-bat 37 of that snapshot carries `awayScore: 0`, while the official running score at the same second is `9–3` (`linescore.teams`). The at-bat score is the score at that moment, not the current score. | same fetch | Fixed + regression-tested (`scoreOf` prefers `linescore.teams`; `tests/game-state-test.mjs` asserts the two disagree) |
+| L-4 | Can a review be detected without the play log? | Yes. `statusCode` carries `M*`, `N*`, `IH` while a challenge/review is open, and `currentPlay.about.startTime`/`endTime` time the at-bat to the second. The 125 ms slate sweep reads the same `statusCode` for every game in one request. | `…/feed/live?fields=…status,statusCode…` + the existing `schedule?hydrate=game(status)` sweep | Verified |
+| L-5 | Is a `diffPatch` delta usable to cut bytes further? | No: `diffPatch?startTimecode=` ignores both `startTimecode` and `fields` and returns the whole document. | `…/game/824638/diffPatch?startTimecode=…` | Rejected (documented in `docs/api-compliance.md` §2) |
+| L-6 | What is the pending-ruling event type? | `os_ruling_pending_primary` / `os_ruling_pending_prior`, from the API's own `/api/v1/eventTypes` registry (~90 codes). | `GET /api/v1/eventTypes` | Verified (already in `reviews.js`) |
+
+### 9.2 What was built
+
+| Workstream | Where | Notes |
+|---|---|---|
+| Latency | `assets/js/api.js` (`STATE_FIELDS`, `gameStateCapture`, `feedProbe`), `assets/js/reviews-feed.js` (`captureTick`) | One ~1.7 KB request per game per 250 ms (150 ms in a review), a ~150 B change probe for quiet games, and the existing 125 ms slate sweep for review/status flips. The play log moved off the fast path entirely (`PLAYLOG_SWEEP_MS` 3 min, 4 s while a ruling is pending, floor 2.5 s). Measured lag (`browser clock at capture − metaData.timeStamp`) is rendered in the latency chip and reported in the status line. |
+| Alert sound | `assets/js/alert-sound.js` | One ~3 s synthesised raindrop figure (five pitch-gliding droplets, a filtered noise rain bed, tanh soft clip, 6 kHz low-pass, damped feedback delay). Ships **off**, remembered per browser, `Test sound` button plays it regardless of the toggle, 1.2 s cooldown so a burst is one sound, and `stats.plays` increments even with audio blocked so "did the alert fire?" is testable. |
+| Live game state | `assets/js/game-state.js`, `#state-section` | Per game: score/hits/errors, inning, count/outs, bases + runner names, batter, pitcher, on-deck, in-hole, current at-bat (index, completion, official start/end time, official description), official status, review status, both challenge counters — stamped with the API's own `metaData.timeStamp` **and** the browser's capture instant, so the lag is a measurement rather than a claim. A before/after diff puts every transition on a second-stamped timeline. |
+| Separate scoring log | `assets/js/scoring-log.js`, `#scoring-section`, `server.mjs` `/api/scoring-log`, `/api/scoring-log/stream` | Its own store (`mlbp.scoringlog.<date>`), its own endpoint, its own file (`data/scoring-log-<date>.json`), its own section. Keeps the official wording before and after, the first-seen API clock, the resolution lag, and survives a refresh. The alert path never waits on it; the alert feed mirrors a pending/changed row so the operator still sees it in the feed. |
+
+### 9.3 Still unverified (needs a live game)
+
+The sandbox this branch was built in cannot reach `statsapi.mlb.com` from a
+browser context (only a plain page fetch is allowed), and the API was archived
+for the curtained dates tried. The following therefore rest on the fixtures and
+on the field-level verification above, not on a live game observed in a
+browser:
+
+- the end-to-end timing of a real challenge (status sweep → capture → chime) — **Unverified live**
+- whether a live `feed/live` `currentPlay` is present for every pitch in the
+  2027 payloads — **Unverified until 2027 live feeds** (2026 fixtures carry it)
+- ABS counter presence pre-first-pitch in 2027 (see D7-4) — unchanged, **Unverified**

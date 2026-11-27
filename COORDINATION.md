@@ -37,6 +37,50 @@ infer or fill in a value.** Anything that cannot be confirmed is left blank and 
 
 ---
 
+## Session `4e8d6970` — the four requested workstreams (2026-11-27)
+
+Branch `arena/4e8d6970-alert5` (from `main` @ `265bdf9`). Claimed and completed
+in one pass; the notes below are what another session needs to know before
+touching these files.
+
+| Workstream | Files (owned by this session's work) | State |
+|---|---|---|
+| Latency of the all-games feed | `assets/js/api.js` (`STATE_FIELDS`, `gameStateCapture`, `feedProbe`), `assets/js/reviews-feed.js` (`captureTick`) | done |
+| Alert sound (3 s raindrop, toggle + test) | `assets/js/alert-sound.js`, `reviews.html` (`#sound-toggle-btn`, `#sound-test-btn`, `#sound-test-note`) | done |
+| Second-stamped official live game state | `assets/js/game-state.js`, `#state-section` in `reviews.html`, `.state-*` in `style.css` | done |
+| Separate persistent official-scoring log | `assets/js/scoring-log.js`, `#scoring-section`, `server.mjs` (`/api/scoring-log`, `/api/scoring-log/stream`), `.scoring-*` in `style.css` | done |
+
+**Rules another session must not break**
+
+1. `api.js` must stay the first script on every page, and page logic
+   (`*-feed.js`, `game.js`, …) the last — `tests/contract-check.mjs` enforces it.
+2. Every `getElementById` id must exist in the page (same test).
+3. The fast path must not start fetching `allPlays`: `tools/smoke-test.mjs`
+   asserts `STATE_FIELDS` has no `allPlays`, that the play log is on a slow
+   cadence, and that a bare count change does not re-arm the burst path. The
+   budget is written down in `docs/api-compliance.md`; change the doc first.
+4. The scoring log is a **separate store**: its own storage prefix, its own
+   endpoint, its own file. Do not route it through `feed-log.js` — the isolation
+   is the feature (a failure there must not delay or break an alert).
+5. `metaData` inside a `?timecode=` snapshot is unreliable. Never diff
+   `metaData` across timecodes; the `?timecode=` re-read is used only to show
+   what the official feed said at that second.
+6. `play.result.awayScore/homeScore` is **not** the running score (verified
+   against `linescore.teams`, which disagrees on game 824638 at-bat 37). Use
+   `linescore.teams`; `tests/game-state-test.mjs` guards this.
+7. The pitcher is `linescore.offense.pitcher` live and `linescore.defense.pitcher`
+   archived — never `currentPlay.matchup.pitcher`, which is the batting side's
+   opposing pitcher.
+
+**Tests added this session** (all wired into `npm test` / `tests/run-all.mjs`):
+`tests/game-state-test.mjs`, `tests/alert-sound-test.mjs`,
+`tests/scoring-log-test.mjs`, plus new smoke sections for the capture archive,
+the alert sound, the captured state and the request budget.
+
+**Still open**, and honestly unverified: end-to-end latency of a real challenge
+in a browser against a live game (the sandbox cannot reach statsapi from a
+page), and 2027 pregame payload details (D7-2/D7-4 above).
+
 ## Task board
 
 | # | Task | Status | Session | File scope | Notes |

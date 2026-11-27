@@ -1527,7 +1527,12 @@
     el.innerHTML = tiles.map(function (t) {
       return '<div class="stat-tile ' + t.cls + '"><div class="stat-num">' + t.n + '</div>' +
         '<div class="stat-label">' + UI.esc(t.label) + '</div></div>';
-    }).join('');
+    }).join('') +
+      '<p class="section-note">Fastest honest polling: one ~1.7 KB live-state request per game ' +
+      'every 250 ms (150 ms while a review is open), a ~150 B change probe when a game is quiet, ' +
+      'and a 125 ms sweep of the whole slate\'s status — the play log is read separately (once, then ' +
+      'every few minutes) so the history never rides on the fast path. Full budget: ' +
+      '<a href="docs/api-compliance.md">docs/api-compliance.md</a>.</p>';
   }
 
   function renderBanner() {
