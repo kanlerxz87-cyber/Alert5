@@ -1327,6 +1327,23 @@ console.log('\n[13b] live state capture, separate official-scoring log, alert-so
     test.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
   });
 
+  await check('LS-6b: a material live-state transition alerts, but stays silent under review', async () => {
+    const GameState = w.GameState;
+    const entry = {
+      id: 'state:823109:' + Date.now() + ':score', kind: 'state_event', gamePk: 823109,
+      matchupLabel: 'SEA @ MIN', lastSeen: Date.now(), firstSeen: Date.now(),
+      transition: { gamePk: 823109, at: Date.now(), atISO: new Date().toISOString(), field: 'score', label: 'SEA @ MIN', text: 'Score: SEA 3 – MIN 4 → SEA 4 – MIN 4' },
+      review: { typeLabel: 'Live state', reason: 'score', isABS: false, family: 'state', runsAtRiskCount: 0 },
+    };
+    st.entries.push(entry);
+    w.ReplayFeed.setFilter('state');
+    const html = text(doc.getElementById('feed-list'));
+    assert(html.includes('Score: SEA 3 – MIN 4 → SEA 4 – MIN 4'), 'state transition row missing from the feed: ' + html.slice(0, 200));
+    st.entries = st.entries.filter((e) => e !== entry);
+    w.ReplayFeed.setFilter('all');
+    assert(GameState, 'game-state.js missing');
+  });
+
   await check('LS-7: the latency read-out reports cadence and the request budget', () => {
     const readout = text(doc.getElementById('latency-readout'));
     assert(readout.includes('budget'), 'latency read-out missing: ' + readout);

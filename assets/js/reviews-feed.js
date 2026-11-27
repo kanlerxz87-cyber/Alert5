@@ -611,6 +611,19 @@
     var captured = captureState(game, feed, plays, capturedAt);
     var ledgerRows = [];
 
+    /* ---- 1b. a material live-state transition on a game that is NOT under
+     * review (score, outs, official status) is a feed event in its own right,
+     * so it alerts like one. Transitions on a game already under review stay
+     * silent here: the review itself already alerted, and a review that stands
+     * for a minute must not chime on every pitch underneath it. */
+    var underReview = !!(captured.snap && captured.snap.inReview);
+    var materialTransition = (captured.rows || []).some(function (r) {
+      return r.field === 'score' || r.field === 'outs' || r.field === 'status';
+    });
+    if (materialTransition && !underReview && !isReviewStatus(game)) {
+      chime('state');
+    }
+
     /* ---- 2. reviews */
     var reviews = Reviews.extractReviews(plays, meta);
     reviews.forEach(function (review) {
