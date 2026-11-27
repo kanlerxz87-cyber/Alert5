@@ -44,7 +44,11 @@
   var AlertSound = global.AlertSound;
   var ScoringLog = global.ScoringLog;
 
-  /* Slowest cadence allowed, and the fast one used while a review is open. */
+  /* Cycle cadence (how soon the next scan may start) and the per-game refresh
+   * cadences. A game under review is re-read at REVIEW_REFRESH_MS — the fastest
+   * in-game cadence the request budget allows — while the cycle itself can
+   * start a new pass sooner than that, because each game has its own due time
+   * and nothing is fetched before it is due. */
   var SCAN_MS = 250;
   var REVIEW_REFRESH_MS = 250;
   var LIVE_REFRESH_MS = 750;
