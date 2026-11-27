@@ -31,10 +31,18 @@
  *          → the API's own clock and event names.  Unchanged timeStamp = the
  *          game did not move; no capture is spent.
  *
- *   CAPTURE (only when the probe says the feed moved, plus a slow floor
- *          CAPTURE_FLOOR_MS)   1 projected feed/live request that carries the
- *          whole state — the same request the feed already made for reviews, so
- *          the capture itself costs nothing extra.
+ *   CAPTURE (250 ms in burst mode, else only when the probe says the feed
+ *          moved, plus a slow floor CAPTURE_FLOOR_MS)   1 projected feed/live
+ *          request carrying the whole state — score, count, outs, bases,
+ *          batter, pitcher, on deck/in hole, official status, the current
+ *          at-bat's startTime/endTime — in ~1.7 KB, measured.  Burst mode
+ *          re-arms on event-level changes only (BURST_KINDS), so a ball or a
+ *          strike alone never holds a slate on the expensive path.
+ *
+ *   PLAYS  (seed, then every PLAYLOG_SWEEP_MS / 4 s while a ruling is pending)
+ *          the play log, on its own cadence, purely for review rows and the
+ *          official-scoring diff.  It is the large part of the payload
+ *          (~16 KB), so it is deliberately not on the fast path.
  *
  *   SLATE  (every SWEEP_MS = 125 ms)  the existing whole-slate status
  *          projection (~2.4 KB) that catches a review the instant MLB flips
@@ -58,11 +66,19 @@
   /* ------------------------------------------------------------- cadences */
   var PROBE_MS = 250;              /* per-game change probe while live        */
   var PROBE_MS_HOT = 150;          /* … while that game is in a review        */
-  var CAPTURE_FLOOR_MS = 1200;     /* probe-mode: capture at least this often    */
+  var CAPTURE_FLOOR_MS = 5000;     /* probe-mode: capture at least this often    */
   var CAPTURE_FLOOR_HOT_MS = 500;
   var CAPTURE_BURST_MS = 250;      /* direct capture interval while the game moves */
   var CAPTURE_HOT_MS = 150;        /* … and while it is in a review / has a ruling */
-  var BURST_WINDOW_MS = 20000;     /* stay in direct-capture mode this long     */
+  var BURST_WINDOW_MS = 12000;     /* stay in direct-capture mode this long     */
+  /* Changes that re-arm the fast path.  A ball or a strike on its own does not:
+   * consecutive pitches change only the count, and paying a 1.7 KB capture for
+   * each one all day is exactly the load this design exists to avoid.  The
+   * probe still catches the next pitch inside one interval, so the observable
+   * delay is the probe RTT — and every genuine event (score, outs, bases,
+   * batter, pitcher, inning, review, official status) keeps the 250 ms path. */
+  var BURST_KINDS = ['score', 'reviewOpen', 'reviewClose', 'status', 'outs', 'bases',
+    'batter', 'pitcher', 'inning', 'atBat'];
   var STATUS_SWEEP_MS = 125;       /* whole-slate official status projection  */
   var SLATE_MS = 5000;             /* hydrated slate refresh (teams, records) */
   var SLATE_MS_IDLE = 30000;
@@ -527,9 +543,12 @@
     state.net.lastApiTimeStamp = snap.apiTimeStamp || state.net.lastApiTimeStamp;
     state.net.lastLatencyMs = snap.latencyMs === null ? state.net.lastLatencyMs : snap.latencyMs;
 
-    /* Movement seen → stay on the single-round-trip path for a while instead of
-     * paying a probe + a capture for every new pitch. */
-    if (d.changes.length) g.burstUntil = Date.now() + BURST_WINDOW_MS;
+    /* An event-level change → stay on the single-round-trip path for a while,
+     * so the follow-up pitches of this at-bat are captured in the same request
+     * instead of costing a probe first. */
+    if (d.changes.some(function (c) { return BURST_KINDS.indexOf(c.kind) !== -1; })) {
+      g.burstUntil = Date.now() + BURST_WINDOW_MS;
+    }
 
     /* Whole-state transitions onto the timeline (every one, second-stamped). */
     if (d.changes.length) {
@@ -2394,6 +2413,8 @@
     PLAYLOG_SWEEP_MS: PLAYLOG_SWEEP_MS,
     PLAYLOG_MIN_GAP_MS: PLAYLOG_MIN_GAP_MS,
     CAPTURE_HOT_MS: CAPTURE_HOT_MS,
+    BURST_WINDOW_MS: BURST_WINDOW_MS,
+    BURST_KINDS: BURST_KINDS,
     SCAN_MS: PROBE_MS,
     STATUS_SWEEP_MS: STATUS_SWEEP_MS,
     SLATE_MS: SLATE_MS,

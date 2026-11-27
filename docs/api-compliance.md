@@ -57,8 +57,8 @@ All figures are per browser tab. "Projected" means the request carries the
 
 | Loop | Constant | Interval | Payload | Purpose |
 | --- | --- | --- | --- | --- |
-| Live-state capture | `CAPTURE_BURST_MS` / `CAPTURE_HOT_MS` | 250 ms / 150 ms while a review is open | ~1.7 KB projected (`STATE_FIELDS`) | The fast path. Used while a game is visibly moving, while it is in a review, and for the first capture. |
-| Change probe | `PROBE_MS` / `PROBE_MS_HOT` | 250 ms / 150 ms | ~150 B (`PROBE_FIELDS`) | Used once a game has gone quiet; only a moved `metaData.timeStamp` triggers a capture. |
+| Live-state capture | `CAPTURE_BURST_MS` / `CAPTURE_HOT_MS` | 250 ms / 150 ms while a review is open | ~1.7 KB projected (`STATE_FIELDS`) | The fast path. Used for 12 s after an event-level change (`BURST_KINDS`), for the whole of any review or open ruling, and for the first capture. A ball or a strike alone does not re-arm it — consecutive pitches would otherwise hold every live game on the expensive path all day. |
+| Change probe | `PROBE_MS` / `PROBE_MS_HOT` | 250 ms / 150 ms | ~150 B (`PROBE_FIELDS`) | The steady state. An unchanged clock costs one small request; a moved clock triggers a capture, so a pitch still lands within one probe interval + one RTT. |
 | Slate status sweep | `STATUS_SWEEP_MS` | 125 ms | `schedule?hydrate=game(status)` — one request for the whole slate | Catches a review/status code change on any game without capturing any of them. |
 | Play-log seed | `PLAYLOG_SWEEP_MS` | once per game, then every 3 min | ~16 KB projected (`FEED_FIELDS`) | Establishes the official-scoring baseline and lets a reclassification be diffed. Shortened to 4 s while a ruling is pending or a review is open (`PLAYLOG_PENDING_MS`), never closer than 2.5 s (`PLAYLOG_MIN_GAP_MS`). |
 | Slate refresh | `SLATE_MS` / `SLATE_MS_IDLE` | 5 s / 30 s | same sweep | Keeps the game list current during the day. |
@@ -69,11 +69,16 @@ and its `_provenance` block): the same 7th-inning snapshot of game 824638 on
 state capture. The 1.7 KB figure is the one that matters: it is why the fast
 path can run at 250 ms without moving megabytes.
 
-**Worst case, full ~15-game slate with every game live and moving:** 15 games ×
-4 captures/s ≈ 60 captures/s plus 8 status sweeps/s ≈ **68 req/s**, at
-~1.7 KB each ≈ 115 KB/s. That is the ceiling a single tab can reach, only while
-all fifteen games are actually playing, and only for the seconds in which each
-game is moving.
+**Ceiling, full ~15-game slate, every game simultaneously live and in a
+review (or 12 s after an event-level change):** 15 games × 4–6.7 captures/s ≈
+60–100 captures/s plus 8 status sweeps/s ≈ **68–108 req/s**, at ~1.7 KB each
+≈ 115–185 KB/s. That is the pathological ceiling for one tab — every game
+playing, every one moving at once — and it lasts only while that is true.
+
+**Ordinary live load:** each game captures for ~12 s after an event, then drops
+to the probe for the rest of the at-bat. Across a full slate that is typically
+**3–10 captures/s plus ~60 probes/s ≈ 60–70 req/s, ~15–25 KB/s**, and it falls
+to nearly nothing between innings or on a quiet slate.
 
 **Typical load:** most games are quiet for most of the day, so the probe path
 (~150 B) dominates: ~15 games × 4 probes/s ≈ 60 probes/s ≈ 9 KB/s, plus a
