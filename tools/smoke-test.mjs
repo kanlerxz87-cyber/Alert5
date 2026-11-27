@@ -1246,6 +1246,33 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
     mutDom.window.close();
   });
 
+  await check('play-log cadence is separate from the 250 ms state path (the request budget)', async () => {
+    const RF = w.ReplayFeed;
+    /* The whole point of the design: the expensive payload is not on the fast
+     * path.  These constants are what docs/api-compliance.md cites. */
+    assert(RF.CAPTURE_BURST_MS === 250, 'burst capture interval must stay 250 ms, got ' + RF.CAPTURE_BURST_MS);
+    assert(RF.CAPTURE_HOT_MS === 150, 'in-review capture interval must stay 150 ms, got ' + RF.CAPTURE_HOT_MS);
+    assert(RF.PROBE_MS === 250 && RF.PROBE_MS_HOT === 150,
+      'probe interval must match the capture interval it stands in for');
+    assert(RF.PLAYLOG_SWEEP_MS >= 60000, 'the play log must not be re-read on a fast cadence');
+    assert(RF.PLAYLOG_MIN_GAP_MS >= 2000, 'two play-log reads of one game must never be closer than 2 s');
+    assert(RF.CAPTURE_FLOOR_MS >= 2000,
+      'a quiet game must not be captured more often than every few seconds');
+    assert(Array.isArray(RF.BURST_KINDS) && RF.BURST_KINDS.indexOf('count') === -1,
+      'a ball or a strike alone must not re-arm the expensive path');
+    assert(RF.BURST_KINDS.indexOf('reviewOpen') !== -1 && RF.BURST_KINDS.indexOf('score') !== -1,
+      'reviews and scoring changes must re-arm the fast path');
+    /* `plays` has to be listed to reach `plays.currentPlay`; what matters is
+     * that `allPlays` — the history, the large part — is not requested. */
+    assert(typeof w.MLB.STATE_FIELDS === 'string' &&
+      w.MLB.STATE_FIELDS.indexOf('currentPlay') !== -1 &&
+      w.MLB.STATE_FIELDS.split(',').indexOf('allPlays') === -1,
+      'the fast-path projection must carry the current at-bat but not the play log');
+    /* The budget is also what the status line reports out loud. */
+    assert(Object.prototype.hasOwnProperty.call(w.ReplayFeed.state.net, 'playLogFetches'),
+      'the feed must report how many play-log reads it made');
+  });
+
   await check('alert sound: a 3 s raindrop figure, off by default, toggled and testable', async () => {
     const btn = doc.getElementById('sound-toggle-btn');
     const testBtn = doc.getElementById('sound-test-btn');
