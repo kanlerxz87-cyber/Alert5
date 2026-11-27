@@ -194,6 +194,16 @@ const PBP_823109 = {
 };
 
 const FEED_823109 = {
+  /* Captured 2026-11-27 from
+   * GET /api/v1.1/game/824638/feed/live?fields=metaData,timeStamp,wait,gameEvents
+   * → {"metaData":{"wait":10,"timeStamp":"20260828_212805",...}}.  The feed
+   * records this second-precision stamp as the official time of every capture. */
+  metaData: {
+    wait: 10,
+    timeStamp: '20260828_142530',
+    gameEvents: ['single'],
+    logicalEvents: ['countChange', 'newRightHandedHit'],
+  },
   gameData: {
     game: { pk: 823109, season: 2026, seriesGameNumber: 2, gamesInSeries: 3 },
     status: { abstractGameState: 'Live', codedGameState: 'M', detailedState: 'Manager challenge: Tag play', statusCode: 'MA', reason: 'Tag play' },
@@ -263,6 +273,26 @@ const FEED_823109 = {
   },
 };
 
+/* A finished game's captured feed: nothing left to review, but its final state
+ * is still captured (that is the "after" side of the game-state record). */
+const FEED_824466_FINAL = {
+  metaData: { wait: 10, timeStamp: '20260916_031500', gameEvents: ['game_finished'], logicalEvents: [] },
+  gameData: {
+    game: { pk: 824466, season: 2026 },
+    status: { abstractGameState: 'Final', codedGameState: 'F', detailedState: 'Final', statusCode: 'F' },
+    teams: { away: { id: 119, name: 'Los Angeles Dodgers' }, home: { id: 137, name: 'San Francisco Giants' } },
+    datetime: { dateTime: '2026-09-15T22:40:00Z', officialDate: '2026-09-15' },
+    review: { hasChallenges: false, away: { used: 0, remaining: 1 }, home: { used: 0, remaining: 1 } },
+  },
+  liveData: {
+    plays: { allPlays: [], currentPlay: null },
+    linescore: {
+      currentInning: 9, inningState: 'End', isTopInning: false, balls: 0, strikes: 0, outs: 3,
+      teams: { away: { runs: 4, hits: 9, errors: 0 }, home: { runs: 2, hits: 7, errors: 1 } },
+    },
+  },
+};
+
 /* people/{id}/stats — shape from GET /api/v1/people/{id}/stats?stats=season,
  * statSplits,gameLog,expectedStatistics&group=hitting&sitCodes=vl,vr */
 const HITTER_STATS = {
@@ -308,7 +338,7 @@ function routeFetch(url) {
   else if (/\/game\/823109\/playByPlay/.test(u)) body = PBP_823109;
   else if (/\/game\/824466\/playByPlay/.test(u)) body = { allPlays: [] };
   else if (/\/game\/823109\/feed\/live/.test(u)) body = FEED_823109;
-  else if (/\/game\/824466\/feed\/live/.test(u)) body = FEED_823109;
+  else if (/\/game\/824466\/feed\/live/.test(u)) body = FEED_824466_FINAL;
   else if (/\/people\/660271\/stats/.test(u)) body = u.includes('opposingPlayerId') ? H2H_STATS : HITTER_STATS;
   else if (/\/people\/592789\/stats/.test(u)) body = PITCHER_STATS;
   else if (u.includes('/api/feed-log')) body = { v: 1, date: '2026-09-15', entries: [], order: [], snapshots: {}, irregularities: {}, grace: {}, settled: [] };
@@ -1163,14 +1193,18 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
     await rescanAnd((at) => assert(at === 0, 'runs-at-risk review must not re-chime (fires once)'));
   });
 
-  await check('G-3: official scoring changes chime and render in All', async () => {
-    let pbp = JSON.parse(JSON.stringify(PBP_823109));
+  await check('G-3: official scoring changes chime and render in All (capture archive)', async () => {
+    /* A reclassification can only be seen by comparing two observations.  The
+     * feed keeps the observed classifications in its own store, so the check
+     * boots the page (observation #1), reclassifies a completed at-bat, drops
+     * the in-memory copy as a refresh would, and captures again (#2). */
+    let feed = JSON.parse(JSON.stringify(FEED_823109));
     const mutFetch = (url) => {
       const u = String(url);
-      if (/\/game\/823109\/playByPlay/.test(u)) {
+      if (/\/game\/823109\/feed\/live/.test(u)) {
         return Promise.resolve({
           ok: true, status: 200, headers: { get: () => null },
-          json: async () => JSON.parse(JSON.stringify(pbp)),
+          json: async () => JSON.parse(JSON.stringify(feed)),
         });
       }
       return routeFetch(u);
@@ -1178,23 +1212,74 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
     const mutDom = await boot('reviews.html', { fetchImpl: mutFetch, beforeParse(x) { x.localStorage.clear(); } });
     await new Promise((r) => setTimeout(r, 700));
     const mst = mutDom.window.ReplayFeed.state;
-    /* Reclassify a completed play between polls (error→single style diff). */
-    pbp.allPlays[0].result.eventType = 'field_error';
-    pbp.allPlays[0].result.description = 'Reached on error.';
-    await new Promise((resolve) => {
-      mst.lastChimeAt = 0;
-      mst.soundOn = true;
-      mutDom.window.ReplayFeed.scan();
-      setTimeout(resolve, 500);
-    });
+    /* Observe, then reclassify atBatIndex 25 single → field error. */
+    const observed = mst.snapshots['823109'];
+    assert(observed && observed[25] && observed[25].eventType === 'single',
+      'first observation must record atBatIndex 25 as a single');
+    assert(st.log && st.log.observations && st.log.observations['823109'] && st.log.observations['823109'][25],
+      'observed classifications must be archived in the feed log, not only in memory');
+    feed.liveData.plays.allPlays[0].result.eventType = 'field_error';
+    feed.liveData.plays.allPlays[0].result.description = 'Reached on error.';
+    /* A refresh throws the in-memory copy away; the archive in the feed's own
+     * store is what makes the comparison possible afterwards. */
+    mst.snapshots = {};
+    mst.lastChimeAt = 0;
+    mst.soundOn = true;
+    mutDom.window.ReplayFeed.scan();
+    await new Promise((r) => setTimeout(r, 800));
     while (mst.scanning) await new Promise((r) => setTimeout(r, 50));
     assert(mst.entries.some((e) => e.kind === 'scoring_change'),
-      'reclassification between polls must create a scoring-change row');
+      'reclassification between captures must create a scoring-change row');
     assert(mst.lastChimeAt > 0, 'new official scoring change must chime');
     mutDom.window.ReplayFeed.setFilter('all');
     const html = text(mutDom.window.document.getElementById('feed-list'));
     assert(html.includes('Official Scoring Change'), 'scoring change must render in All');
     mutDom.window.close();
+  });
+
+  await check('alert sound: a 3 s raindrop figure, off by default, toggled and testable', async () => {
+    const btn = doc.getElementById('sound-toggle-btn');
+    const testBtn = doc.getElementById('sound-test-btn');
+    assert(btn && testBtn, 'both the sound toggle and the test button must exist');
+    assert(st.soundOn === false, 'the alert sound ships OFF (it is an opt-in for a page open all day)');
+    assert(/Sound Off/.test(btn.textContent), 'toggle must read "Sound Off" by default');
+    /* Test button plays even while alerts are off, and says so. */
+    const before = w.AlertSound.stats.plays;
+    testBtn.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+    assert(w.AlertSound.stats.plays === before + 1, 'Test sound must fire one alert sound');
+    assert(!/is-hidden/.test(doc.getElementById('sound-test-note').className),
+      'the test note must become visible so the operator knows it fired');
+    /* Turning the sound on plays a preview of the same figure. */
+    w.ReplayFeed.toggleSound();
+    assert(st.soundOn === true, 'sound toggle did not turn the alert sound on');
+    /* The figure itself: five droplets over ~3 s, one shared cooldown. */
+    assert(w.AlertSound.DURATION_S === 3, 'the raindrop figure is 3 s');
+    assert(w.AlertSound.COOLDOWN_MS > 0 && w.AlertSound.COOLDOWN_MS < 3000,
+      'consecutive alerts must share one sound rather than stacking');
+    w.ReplayFeed.toggleSound();
+    assert(st.soundOn === false, 'sound toggle did not turn the alert sound off');
+    try { w.localStorage.setItem('mlbp.pref.sound', '0'); } catch (e) { /* ignore */ }
+  });
+
+  await check('official live game state: captured per game with the API\'s own second stamp', async () => {
+    const caps = st.capture;
+    assert(caps && caps['823109'] && caps['823109'].snap, 'game 823109 must be captured');
+    const snap = caps['823109'].snap;
+    assert(snap.score && typeof snap.score.away === 'number' && typeof snap.score.home === 'number',
+      'captured state must carry the official score');
+    assert(typeof snap.count.balls === 'number' && typeof snap.count.outs === 'number',
+      'captured state must carry count and outs');
+    assert(snap.batter && snap.batter.name, 'captured state must carry the batter');
+    assert(snap.pitcher && snap.pitcher.name, 'captured state must carry the pitcher');
+    assert(snap.bases && ('first' in snap.bases), 'captured state must carry the bases');
+    assert(snap.atBat && snap.atBat.index !== null, 'captured state must carry the current at-bat');
+    assert(snap.apiTimeStamp === '20260828_142530',
+      'the stamp must be the API\'s own metaData.timeStamp, got ' + snap.apiTimeStamp);
+    assert(snap.latencyMs !== null && snap.latencyMs >= 0, 'capture latency must be measured, not guessed');
+    assert(Object.keys(st.capture).length >= 3, 'every game on the slate must be captured');
+    const panel = text(doc.getElementById('state-section'));
+    assert(/Official live game state/.test(panel), 'the captured-state section must render');
+    assert(/20260828_142530/.test(panel), 'the section must show the official API clock');
   });
 
   await check('G-2: empty slate renders an empty-state notice, not a blank list', async () => {

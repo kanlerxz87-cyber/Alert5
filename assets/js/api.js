@@ -248,6 +248,67 @@
       });
   }
 
+  /* ------------------------------------------------------------------------
+   * Live capture projection (reviews.html · the all-games feed)
+   *
+   * One `fields` projection that carries everything a second-by-second capture
+   * needs — official timestamp, whole baseball state, review status and
+   * counters, play classifications — and nothing that only a game page uses
+   * (players, boxscore, rosters, weather).  Verified against the live API on
+   * 2026-11-27; it is the same request the feed already made for reviews, so
+   * the capture costs no extra requests.
+   * ---------------------------------------------------------------------- */
+  var FEED_FIELDS = [
+    'metaData', 'timeStamp', 'wait', 'gameEvents', 'logicalEvents',
+    'gameData', 'game', 'pk', 'season', 'teams', 'away', 'home', 'id', 'name',
+    'abbreviation', 'venue', 'datetime', 'dateTime', 'officialDate', 'status',
+    'detailedState', 'statusCode', 'abstractGameState', 'codedGameState',
+    'reason', 'startTimeTBD', 'review', 'absChallenges', 'hasChallenges',
+    'used', 'remaining', 'usedSuccessful', 'usedFailed', 'fullName',
+    'liveData', 'plays', 'allPlays', 'currentPlay', 'about', 'atBatIndex',
+    'isComplete', 'halfInning', 'inning', 'isTopInning', 'startTime', 'endTime',
+    'hasReview', 'isScoringPlay', 'result', 'eventType', 'description', 'isOut',
+    'rbi', 'awayScore', 'homeScore', 'count', 'balls', 'strikes', 'outs',
+    'matchup', 'batter', 'pitcher', 'onDeck', 'inHole', 'playEvents', 'details',
+    'call', 'reviewDetails', 'reviewType', 'isOverturned', 'inProgress',
+    'challengeTeamId', 'index', 'isPitch', 'pitchNumber', 'runners', 'movement',
+    'originBase', 'start', 'end', 'outBase', 'outNumber', 'isScoringEvent',
+    'playIndex', 'linescore', 'currentInning', 'currentInningOrdinal',
+    'inningState', 'runs', 'hits', 'errors', 'leftOnBase', 'offense', 'defense',
+    'first', 'second', 'third',
+  ].join(',');
+
+  /* The tiny change detector: ~150 bytes of official clock + event names. */
+  var PROBE_FIELDS = 'metaData,timeStamp,wait,gameEvents,logicalEvents';
+
+  /* GET /api/v1.1/game/{pk}/feed/live — one captured state.
+   *   opts.timecode "YYYYMMDD_HHMMSS" re-reads the official snapshot of that
+   *   second, so a "before" state can be re-verified against the API instead of
+   *   being reconstructed from what our page happened to see. */
+  function gameFeedCaptureUrl(gamePk, opts) {
+    opts = opts || {};
+    var qs = ['fields=' + encodeURIComponent(opts.fields || FEED_FIELDS)];
+    if (opts.timecode) qs.push('timecode=' + encodeURIComponent(opts.timecode));
+    return API_ROOT + '/v1.1/game/' + encodeURIComponent(gamePk) + '/feed/live?' + qs.join('&');
+  }
+
+  function gameFeedCapture(gamePk, opts) {
+    opts = opts || {};
+    return getJSON(gameFeedCaptureUrl(gamePk, opts), { signal: opts.signal, retries: 0 });
+  }
+
+  function feedProbeUrl(gamePk, opts) {
+    opts = opts || {};
+    var qs = 'fields=' + encodeURIComponent(opts.fields || PROBE_FIELDS);
+    if (opts.timecode) qs += '&timecode=' + encodeURIComponent(opts.timecode);
+    return API_ROOT + '/v1.1/game/' + encodeURIComponent(gamePk) + '/feed/live?' + qs;
+  }
+
+  function feedProbe(gamePk, opts) {
+    opts = opts || {};
+    return getJSON(feedProbeUrl(gamePk, opts), { signal: opts.signal, retries: 0 });
+  }
+
   /* Lean per-game status projection for the game page's 125ms watcher (~150 B). */
   function gameStatusLean(gamePk, opts) {
     opts = opts || {};
@@ -400,6 +461,12 @@
     scheduleRange: scheduleRange,
     slateStatus: slateStatus,
     gameFeed: gameFeed,
+    gameFeedCapture: gameFeedCapture,
+    gameFeedCaptureUrl: gameFeedCaptureUrl,
+    feedProbe: feedProbe,
+    feedProbeUrl: feedProbeUrl,
+    FEED_FIELDS: FEED_FIELDS,
+    PROBE_FIELDS: PROBE_FIELDS,
     gameStatusLean: gameStatusLean,
     playByPlay: playByPlay,
     boxscore: boxscore,

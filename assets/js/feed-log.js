@@ -36,6 +36,8 @@
       irregularities: {},
       grace: {},
       settled: [],
+      timelines: {},
+      captures: {},
     };
   }
 
@@ -75,6 +77,8 @@
       irregularities: (payload.irregularities && typeof payload.irregularities === 'object') ? payload.irregularities : {},
       grace: (payload.grace && typeof payload.grace === 'object') ? payload.grace : {},
       settled: Array.isArray(payload.settled) ? payload.settled.slice() : [],
+      timelines: (payload.timelines && typeof payload.timelines === 'object') ? payload.timelines : {},
+      captures: (payload.captures && typeof payload.captures === 'object') ? payload.captures : {},
     };
   }
 
@@ -144,6 +148,35 @@
     var settledSet = Object.create(null);
     base.settled.concat(add.settled).forEach(function (s) { settledSet[s] = true; });
 
+    /* Captured state: newest capture per game wins, and per-game timelines are
+     * concatenated (deduplicated by timestamp + text) and kept bounded. */
+    var captures = Object.assign({}, base.captures);
+    Object.keys(add.captures).forEach(function (pk) {
+      var a = add.captures[pk] || {};
+      var b = captures[pk] || {};
+      if (!a.snap) { captures[pk] = b; return; }
+      if (!b.snap) { captures[pk] = a; return; }
+      var aAt = (a.snap && a.snap.capturedAt) || 0;
+      var bAt = (b.snap && b.snap.capturedAt) || 0;
+      captures[pk] = aAt >= bAt ? a : b;
+    });
+    var timelines = Object.assign({}, base.timelines);
+    Object.keys(add.timelines).forEach(function (pk) {
+      var seen = Object.create(null);
+      var merged = [];
+      (Array.isArray(timelines[pk]) ? timelines[pk] : []).concat(
+        Array.isArray(add.timelines[pk]) ? add.timelines[pk] : []
+      ).forEach(function (row) {
+        if (!row) return;
+        var key = String(row.at) + '|' + String(row.kind) + '|' + String(row.text);
+        if (seen[key]) return;
+        seen[key] = true;
+        merged.push(row);
+      });
+      merged.sort(function (x, y) { return (x.at || 0) - (y.at || 0); });
+      timelines[pk] = merged.slice(-60);
+    });
+
     return {
       v: 1,
       date: date,
@@ -154,6 +187,8 @@
       irregularities: irregularities,
       grace: grace,
       settled: Object.keys(settledSet),
+      timelines: timelines,
+      captures: captures,
     };
   }
 

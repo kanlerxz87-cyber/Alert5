@@ -1019,6 +1019,156 @@ table.driver-table td.src-cell a:hover { color: var(--accent); }
   color: var(--muted);
 }
 
+/* ------------------------------------------- replay feed: latency + sound */
+.latency-slot { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+.latency-slot:empty { display: none; }
+.latency-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  background: #0e141c;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-top: 8px;
+}
+.sound-test-note {
+  max-width: 1000px;
+  margin: 8px auto 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--green-soft, #51cf66);
+  border-left: 3px solid var(--green, #2f9e44);
+  background: rgba(47, 158, 68, .08);
+}
+.sound-test-note.is-hidden { display: none; }
+.btn-tiny { font-size: 11.5px; padding: 3px 8px; }
+.muted { color: var(--dim); }
+.ok { color: var(--green-soft, #51cf66); }
+
+/* ------------------------------------------- replay feed: captured state */
+.state-section { margin-bottom: 14px; }
+.state-section:empty { display: none; }
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+.section-head h2 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: .2px;
+  color: #e8eef6;
+}
+.section-actions { display: flex; gap: 6px; }
+.section-note {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.5;
+}
+.section-note code { font-size: 11px; }
+.state-toggle { margin-bottom: 10px; }
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+.state-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+.state-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.state-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.state-score {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .5px;
+}
+.state-people { font-size: 12px; }
+.state-clock {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+}
+.state-timeline {
+  margin: 2px 0 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  display: grid;
+  gap: 2px;
+}
+.state-timeline .stamp { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.feed-row-state { border-left: 3px solid var(--accent); }
+.feed-row-state .stamp { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.feed-top .stamp { font-family: var(--mono); font-size: 10.5px; }
+.status-track {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  font-size: 12.5px;
+  border-top: 1px dashed var(--line-soft);
+  padding-top: 8px;
+}
+.status-track dt { color: var(--dim); }
+.status-track dd { margin: 0; }
+
+/* ------------------------------------------- replay feed: scoring log */
+.scoring-section {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 2px solid var(--line);
+}
+.scoring-section:empty { display: none; }
+.scoring-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.scoring-summary b { color: #e8eef6; font-family: var(--mono); }
+.scoring-tabs { margin-bottom: 10px; }
+.scoring-list { display: grid; gap: 10px; }
+.scoring-row { border-left: 3px solid var(--amber); }
+.scoring-notes {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.chip-pending { border-color: var(--violet); color: #d0bfff; }
+.chip-state { border-color: var(--accent); color: #a5c8ff; }
+.chip-ghost { border-color: var(--line); color: var(--dim); font-family: var(--mono); }
+
 /* -------------------------------------------------------------- status line */
 .status-line {
   max-width: 1500px;
