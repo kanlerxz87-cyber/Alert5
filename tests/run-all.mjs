@@ -26,6 +26,7 @@ results.push(run('link-check', process.execPath, [path.join(HERE, 'link-check.mj
 results.push(run('contract-check', process.execPath, [path.join(HERE, 'contract-check.mjs')]));
 results.push(run('jsdom-render-test', process.execPath, [path.join(HERE, 'jsdom-render-test.mjs')]));
 results.push(run('preview-day-render-test', process.execPath, [path.join(HERE, 'preview-day-render-test.mjs')]));
+results.push(run('state-log-test', process.execPath, [path.join(HERE, 'state-log-test.mjs')]));
 
 // Report, and ignore a SKIPPED jsdom run (exit 0 with a SKIPPED line).
 console.log('\n========== summary ==========');

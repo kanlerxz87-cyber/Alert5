@@ -10,9 +10,12 @@ Copied from [snapquast73-boop/LIVPBP](https://github.com/snapquast73-boop/LIVPBP
 
 No build step or API key is required. GitHub Pages serves the files directly. Live data comes from MLB StatsAPI in the visitor’s browser. Keep a page open for polling alerts; browser audio may require a click. Pages uses browser-local persistence, not the optional server’s shared store.
 
+Latency policy and the terms-of-use position: [`docs/api-latency-and-terms.md`](docs/api-latency-and-terms.md). Live game state, the separate official-scoring log and the alert sound: [`docs/live-state-and-scoring-log.md`](docs/live-state-and-scoring-log.md) and [`docs/alert-sound.md`](docs/alert-sound.md).
+
 ```sh
 npm ci
 npm run test:all
+npm run test:state   # live state, official-scoring log, alert sound, request budget
 npm run test:official # requires access to statsapi.mlb.com
 npm run serve        # optional local server, port 8000, binds 0.0.0.0
 ```
@@ -106,12 +109,23 @@ mlb.com uses, re-implemented from scratch in vanilla HTML/CSS/JS.
     Challenges** stat, and in the challenges-remaining counters),
     **Challenges**, **Reviews**, **Boundary Calls**, **Under Review**,
     **⚠️ Runs at Risk** —,
-    summary stats for the whole day, and an optional **sound alert** — a gentle
-    synthesized raindrop chime (three soft drops blooming into a warm two-note
-    chime, ~1.2s, pure sine tones with a light echo) when a new challenge, review,
-    or boundary call lands. It is off by default, remembers your choice per
-    browser, and never fires for routine ABS pitch challenges (the run-at-risk
-    case below is the one exception, and it uses this exact same chime).
+    summary stats for the whole day, and an optional **alert sound** — a gentle
+    synthesized raindrop chime, **~3 seconds** (soft sine drops on an A-minor
+    pentatonic figure, a light echo and a warm two-note bloom that fades out;
+    pure sine tones through a 3.4 kHz low-pass, no buzzer), built to be heard all
+    season without fatigue. It is off by default, remembers your choice per
+    browser, and sounds for **every event that appears in the feed** — new
+    manager challenges, crew-chief/umpire reviews, instant replays, boundary
+    calls, official-scorer pending rulings, official scoring changes and runs at
+    risk. Routine ABS pitch challenges stay silent by policy (dozens a game);
+    they remain tracked in the ABS tab and the counters. One sound per event
+    burst (2.5 s cooldown) so five events in one poll do not stack, and the same
+    sound is used by the scoreboard's review ticker and the game page, so it is
+    recognisable across surfaces. **▶︎ Test sound** plays it on demand even while
+    alerts are muted, and turning the toggle on plays the real sound once — the
+    audio path can be verified at any time, not just when a challenge happens.
+    The read-out next to the controls says whether the browser is currently
+    blocking audio (it does until the first click).
   - **⚠️ Runs at Risk — "could this review take a run OFF the board?"** The feed
     tracks, per review, whether the call on the field credited runs to the very
     event now under review, so an overturn could remove them from the score. When
@@ -157,10 +171,15 @@ mlb.com uses, re-implemented from scratch in vanilla HTML/CSS/JS.
   the lean probe (~3 KB) while the 1–2MB full feed is still downloading (and
   while a review is in flight the page probes the lean play-by-play endpoint
   every **250ms**, pulling the full feed only when the review state flips). The
-  Replay Feed scans every live game's play-by-play every **250ms** and sweeps the
-  whole slate's official status every **125ms**; a game that flips into a review
-  *during* a scan is fetched out of band instead of waiting for that scan to
-  finish. The scoreboard keeps its 500ms hydrated-schedule poll and adds the same
+  Replay Feed sweeps the whole slate's official status every **125ms**; a game
+  under review is re-read every **250ms**, other live games on their own due
+  times (**750ms**, relaxing to **1200ms** on a slate of more than eight live
+  games) so no game is starved, and the challenge counters on a slower **15s**
+  clock. A game that flips into a review *during* a cycle is fetched out of band
+  instead of waiting for that cycle to finish, and a hidden tab keeps a 3s
+  heartbeat rather than stopping, so returning to it paints current data. Every
+  one of those cadences is capped by the request budget in `assets/js/api.js`,
+  not by the timer. The scoreboard keeps its 500ms hydrated-schedule poll and adds the same
   **125ms status sweep** for the review ticker. When the persistence server is running, a **live push**
   (server-sent events) delivers every tracked entry recorded by another tab or
   browser as soon as it is written — the Replay Feed is the only writer of that
@@ -168,6 +187,36 @@ mlb.com uses, re-implemented from scratch in vanilla HTML/CSS/JS.
   fallback (and for static hosting). Post-Final scorer rulings are re-scanned every **1s** for the
   first two minutes, then 2.5s to five minutes, then 15s inside a bounded
   30-minute grace. Works on desktop and mobile.
+- **📡 Live game state, captured as it happens** — every game on the slate is
+  snapshotted on every capture into a complete, second-stamped official state:
+  score, inning/half, outs, balls/strikes, total pitch count, the batter at bat,
+  the pitcher, the runners on base, and the exact official status wording. Two
+  consecutive captures are diffed, so each *transition* is recorded in the API's
+  own words (`Score: SEA 3 – MIN 4 → SEA 4 – MIN 4`,
+  `Status: Manager challenge: Tag play → Umpire review: Home run`) rather than
+  only its final value. The newest 12 transitions per game appear in the main
+  feed as 📡 rows; the full history and the per-game score/outs timeline are in
+  the 📡 Game State tab. Records come from `assets/js/game-state.js`; the rule
+  that a first observation never has a fabricated "before" is enforced there.
+- **✏️ Official scoring — a separate, persisted section** — official-scorer
+  *pending rulings* (`os_ruling_pending_primary` / `os_ruling_pending_prior`, the
+  at-bat has not been scored yet) and *scoring changes* (the official scorer
+  reclassifying an already-scored play) are logged in the ✏️ Official Scoring
+  section, deliberately **outside** the alert feed. Each row keeps the exact
+  official wording before and after the change (event type + description, RBI,
+  out flag, outs, score), when it was first and last observed, and its source
+  endpoint. A pending ruling is updated — never deleted — to `resolved` with the
+  wording that replaced it. The log survives a page refresh, a new tab and (with
+  the optional server) a different browser; it is stored in its own key and its
+  own file, so it cannot disturb the alert path. CSV/JSON export included.
+  Details: [`docs/live-state-and-scoring-log.md`](docs/live-state-and-scoring-log.md).
+- **Honest, bounded request rate.** Every call is charged to a request class with
+  a documented per-minute ceiling (`BUDGET_PROFILES` in `assets/js/api.js`), and
+  a spent budget skips a cycle (a silent deferral) instead of piling up requests
+  or showing an error. The play-by-play poll is conditionally revalidated, so an
+  unchanged game costs headers only. The read-out under the feed shows the
+  cadence actually held, the ceiling, and how many calls were deferred. Full
+  numbers and the terms-of-use position: [`docs/api-latency-and-terms.md`](docs/api-latency-and-terms.md).
 - **"Under review" is detected from the official game status, not from play
   text.** All three surfaces run a dedicated **125ms review-status watcher**
   (`GET /api/v1/schedule` with a `fields` projection and no hydrations — the
@@ -422,9 +471,16 @@ GitHub Actions**.
 - **Refresh rate:** `LIVE_POLL_MS`, `REVIEW_POLL_MS`, `PREVIEW_POLL_MS`, and `FINAL_POLL_MS` in
   `assets/js/game.js` (the 250ms in-review probe uses `REVIEW_POLL_MS` against the
   lean `playByPlay` endpoint); `LIVE_POLL_MS` / `REVIEW_POLL_MS` / `IDLE_POLL_MS`
-  in `assets/js/scoreboard.js` and `assets/js/reviews-feed.js`;
-  `FETCH_CONCURRENCY` in `assets/js/reviews-feed.js` (how many games the all-games
-  feed fetches in parallel per scan).
+  in `assets/js/scoreboard.js`; `REVIEW_REFRESH_MS` / `LIVE_REFRESH_MS` /
+  `LIVE_RELAXED_MS` / `COUNTER_REFRESH_MS` / `HIDDEN_SCAN_MS` and
+  `FETCH_CONCURRENCY` in `assets/js/reviews-feed.js`.
+- **Request budget:** `BUDGET_PROFILES` and the token bucket in `assets/js/api.js`
+  (requests per minute per class, plus the burst). Raising a number there is the
+  one change that can turn a fast feed into a blocked IP — see
+  [`docs/api-latency-and-terms.md`](docs/api-latency-and-terms.md) before doing it.
+- **Alert sound:** `assets/js/alert-sound.js` (`COOLDOWN_MS`, `LENGTH_MS`, the drop
+  figure and the bloom). It is shared by all three pages, so a change is heard
+  everywhere at once.
 - **Team colors:** `TEAM_COLORS` in `assets/js/ui.js`.
 
 ## Notes & etiquette
@@ -449,16 +505,17 @@ GitHub Actions**.
   slow down. The live push is server-side (same-origin `EventSource`) and adds
   no requests to MLB's API. The Replay Feed scans live games'
   playByPlay (the light, `fields`-projected endpoint — no boxscore/rosters)
-  every 250ms, subtracts scan time from the next wait, fetches in-review games
-  first, and only re-renders when a review event actually changes. Worst case
-  on a full ~15-game slate that is ~60 playByPlay requests/s plus ~4 tiny
-  status sweeps/s (~68 req/s, single client, since the sweep went 250ms → 125ms)
-  — far below "thousands of requests per second", and the same cadence the page
-  already used whenever any review was in flight. The 1s post-Final tier adds
-  ~70 requests per finished game
-  across its 30-minute grace (~292 total, up from ~220) — bounded, and only for
-  games that have just gone final. The StatsAPI is
-  pull-only — a shorter poll only reduces how long a landed event sits unseen.
+  on a per-game due time, fetches in-review games first, conditionally
+  revalidates (an unchanged game answers `304` from the cached body), and only
+  re-renders when a review event actually changes. Worst case on a full ~15-game
+  slate that is ~20 playByPlay requests/s plus ~8 tiny status sweeps/s — bounded
+  by the `pbp` (480/min) and `status` (600/min) token buckets in
+  `assets/js/api.js`, so the timer can never outrun the budget, and a spent
+  budget skips a cycle silently instead of erroring. Post-Final re-scans are
+  2s → 5s → 15s inside a 30-minute grace window. The StatsAPI is pull-only — a
+  shorter poll only reduces how long a landed event sits unseen, and the exact
+  numbers, the terms-of-use position and the compliance reasoning are in
+  [`docs/api-latency-and-terms.md`](docs/api-latency-and-terms.md).
 - This is a **personal, non-commercial project** (no ads, no analytics, no data resale — see the
   request budget and the governing terms in `docs/api-compliance.md` *(not part of the upload — see F-003 on [`flagged.html`](flagged.html))*).
   It lives in a public repository and is served from GitHub Pages; that is hosting, not a service

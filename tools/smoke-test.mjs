@@ -1234,6 +1234,109 @@ console.log('\n[13] reference-parity fixes (session 6e2a58d9: G-2…G-5, G-9)');
   dom.window.close();
 }
 
+/* ------------------------------------ [13b] live state, scoring log, alert sound */
+
+console.log('\n[13b] live state capture, separate official-scoring log, alert-sound toggle');
+{
+  const dom = await boot('reviews.html', { beforeParse(w) { w.localStorage.clear(); } });
+  await new Promise((r) => setTimeout(r, 1200));
+  const w = dom.window;
+  const doc = w.document;
+  const st = w.ReplayFeed.state;
+
+  await check('LS-1: every captured game gets a second-stamped official state snapshot', () => {
+    assert(w.GameState, 'game-state.js not loaded');
+    assert(st.stateCount > 0, 'no state captures recorded');
+    const snaps = Object.keys(st.liveStates);
+    assert(snaps.length > 0, 'no per-game state');
+    const snap = st.liveStates[snaps[0]];
+    assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(snap.capturedAtISO),
+      'capture timestamp is not ISO second-stamped: ' + snap.capturedAtISO);
+    ['score', 'inning', 'count', 'pitchCount', 'batter', 'pitcher', 'bases', 'status'].forEach((k) => {
+      assert(snap[k] !== undefined, 'snapshot missing ' + k);
+    });
+  });
+
+  await check('LS-2: the state panel renders the official state and its history', () => {
+    const panel = text(doc.getElementById('state-panel'));
+    assert(panel.includes('Live game state'), 'state panel heading missing');
+    assert(/Score/.test(panel) && /Pitch count/.test(panel), 'state fields missing: ' + panel.slice(0, 200));
+    assert(panel.includes('captured '), 'capture clock missing');
+  });
+
+  await check('LS-3: the official-scoring log is a separate panel from the alert feed', () => {
+    const scoring = doc.getElementById('scoring-panel');
+    const feed = doc.getElementById('feed-list');
+    assert(scoring && feed, 'both sections must exist');
+    assert(!feed.contains(scoring), 'the scoring log must not be inside the alert feed');
+    assert(text(scoring).includes('Official scoring log'), 'scoring heading missing');
+    assert(/pending/.test(text(scoring)) && /change/.test(text(scoring)), 'scoring counters missing');
+    assert(doc.getElementById('scoring-export-csv') && doc.getElementById('scoring-export-json'),
+      'export controls missing');
+  });
+
+  await check('LS-4: a pending ruling and a scoring change are logged with both wordings', async () => {
+    const at = 1000;
+    const row = w.GameState.ledgerRow({
+      kind: 'pending', basis: 'primary event ruling pending', gamePk: 823109, atBatIndex: 71,
+      at, label: 'SEA @ MIN', inningLabel: 'Top 8', batter: 'Test Batter',
+      before: { eventType: 'os_ruling_pending_primary', description: 'Official Scorer Ruling Pending' },
+      state: 'pending', sourceUrl: 'https://statsapi.mlb.com/api/v1/game/823109/playByPlay',
+    });
+    w.GameState.addLedgerRow(st.gameLog, row);
+    w.GameState.addLedgerRow(st.gameLog, w.GameState.ledgerRow({
+      kind: 'scoring_change', basis: 'reclassified', gamePk: 823109, atBatIndex: 25,
+      at: at + 1, label: 'SEA @ MIN', inningLabel: 'Bot 6', batter: 'Test Batter',
+      before: { eventType: 'single', description: 'Batter singles.', rbi: 0, isOut: false },
+      after: { eventType: 'field_error', description: 'Batter reaches on an error.', rbi: 0, isOut: false },
+      state: 'observed',
+    }));
+    w.ReplayFeed.setScoringFilter('all');
+    const panel = text(doc.getElementById('scoring-panel'));
+    assert(panel.includes('Official Scorer Ruling Pending'), 'pending wording missing: ' + panel.slice(0, 300));
+    assert(panel.includes('Before (official)') && panel.includes('After (official)'),
+      'before/after wording missing');
+    assert(panel.includes('Official event type: single → field_error') ||
+      panel.includes('single') && panel.includes('field_error'), 'field diff missing');
+  });
+
+  await check('LS-5: the scoring log survives a reload (persisted separately)', async () => {
+    w.ReplayFeed.saveState();
+    const stored = w.localStorage.getItem('mlbp.state.v1.' + st.date);
+    assert(stored, 'no state bucket in localStorage');
+    const parsed = JSON.parse(stored);
+    assert(Array.isArray(parsed.ledger) && parsed.ledger.length >= 2, 'ledger not persisted: ' + (parsed.ledger || []).length);
+    const again = await boot('reviews.html', { beforeParse(x) { /* keep storage */ } });
+    await new Promise((r) => setTimeout(r, 800));
+    const panel = text(again.window.document.getElementById('scoring-panel'));
+    assert(panel.includes('Official Scorer Ruling Pending'), 'restored log lost its pending row: ' + panel.slice(0, 240));
+    again.window.close();
+  });
+
+  await check('LS-6: alert sound toggles on/off and the test button is always available', () => {
+    const btn = doc.getElementById('sound-toggle-btn');
+    const test = doc.getElementById('sound-test-btn');
+    assert(btn && test, 'alert controls missing');
+    assert(w.AlertSound.state().lengthMs === 3000, 'alert sound length is not ~3s');
+    const before = w.AlertSound.isEnabled();
+    btn.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+    assert(w.AlertSound.isEnabled() !== before, 'toggle did not flip the preference');
+    assert(btn.getAttribute('aria-pressed') === String(w.AlertSound.isEnabled()), 'aria-pressed out of sync');
+    assert(w.localStorage.getItem('mlbp.pref.sound') !== null, 'preference not stored');
+    assert(st.soundOn === w.AlertSound.isEnabled(), 'ReplayFeed state out of sync with the sound module');
+    test.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  });
+
+  await check('LS-7: the latency read-out reports cadence and the request budget', () => {
+    const readout = text(doc.getElementById('latency-readout'));
+    assert(readout.includes('budget'), 'latency read-out missing: ' + readout);
+    assert(/\d+\/min/.test(readout), 'no documented per-minute ceiling shown: ' + readout);
+    assert(readout.includes('deferred'), 'deferral counter missing');
+  });
+
+  dom.window.close();
+}
+
 /* ----------------------------------------------------- [14] upcoming game days */
 
 console.log('\n[14] Upcoming game days (2027-03-25 Opening Day & startTimeTBD preview shape)');

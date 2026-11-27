@@ -36,6 +36,52 @@
       <p><a href="docs/alert5-copy-verification.md">Copy verification scope, sources and tests</a> · <a href="COORDINATION.md">Current coordination board</a></p>
     </section>
 
+    <section id="latency-state-scoring" class="flagged-intro">
+      <h1>Latency, live state, official-scoring log and alert sound — 2026-11-27</h1>
+      <p>Session <code>ec03918b</code>. What was implemented, and what remains unverified. Nothing
+      below asserts a measured MLB response time or a guaranteed alert delay.</p>
+      <ul>
+        <li><strong>Implemented and tested:</strong> second-stamped live game state for every game on
+        every cycle (score, inning, outs, count, pitch count, batter, pitcher, runners, official
+        status), diffed against the previous capture so transitions keep their before/after wording;
+        a separate ✏️ Official Scoring section for official-scorer pending rulings and scoring
+        changes with the exact official wording on both sides, persisted independently of the alert
+        feed (localStorage + optional <code>/api/game-state</code>); a shared ~3 s raindrop alert
+        sound with an on/off toggle and an always-available test button; a per-class request budget
+        that bounds every poll cadence. Checks: <code>npm run test:all</code> — 26 state/log/sound/budget
+        checks plus 7 end-to-end UI checks (<code>tools/smoke-test.mjs</code> section [13b]).</li>
+        <li><strong>Unverified — latency:</strong> the real end-to-end delay between MLB writing an
+        event and this page showing it cannot be measured from this build sandbox: direct sockets to
+        <code>statsapi.mlb.com</code> are blocked here, and neither the StatsAPI nor MLB publishes a
+        delivery SLA. The cadences are enforced in code and visible in the page's read-out; the
+        resulting wall-clock latency is not claimed.
+        <a href="https://statsapi.mlb.com/api/v1/game/824638/playByPlay">Official play-by-play
+        endpoint</a> · <a href="docs/api-latency-and-terms.md">latency and terms document</a>.</li>
+        <li><strong>Unverified — terms of use:</strong> there is no published numeric rate limit and
+        no written authorization either way. The site self-limits, honours HTTP 429 with the host's
+        own <code>Retry-After</code>, and documents the two clauses that pull in different directions
+        (the API's “individual, non-commercial, non-bulk” notice and MLB.com's Terms of Use §1).
+        Whether a public deployment is permitted is a question for MLB Advanced Media, not something
+        this repository can settle.
+        <a href="https://www.mlb.com/official-information/terms-of-use">MLB.com Terms of Use</a> ·
+        <a href="docs/api-latency-and-terms.md">compliance section</a>.</li>
+        <li><strong>Unverified — pending-ruling and scoring-change shapes on live 2026 data:</strong>
+        the <code>os_ruling_pending_primary</code> / <code>os_ruling_pending_prior</code> event types
+        and the reclassification fields (<code>result.eventType</code>, <code>result.description</code>,
+        <code>result.isOut</code>, <code>result.rbi</code>, <code>count.outs</code>) are read from the
+        official registry and payload, and the parsers are exercised with payloads copied from
+        official responses — but no live pending ruling was observed during this session, so the
+        end-to-end live capture of one is not certified here.
+        <a href="https://statsapi.mlb.com/api/v1/eventTypes">eventTypes registry</a> ·
+        <a href="docs/live-state-and-scoring-log.md">field-by-field mapping</a>.</li>
+        <li><strong>Known behaviour, not a defect:</strong> a background tab may alert slightly late
+        because browsers throttle timers; audio stays blocked until the first click on the page (the
+        read-out says so); on GitHub Pages the state/log store is per-browser because
+        <code>server.mjs</code> cannot run there; and a review MLB never writes into
+        <code>reviewDetails</code> is invisible to every client, including mlb.com's.</li>
+      </ul>
+    </section>
+
     <div class="flagged-intro">
       <h1 style="margin-top:0">Flagged for Review</h1>
       <div style="border:1px solid #f59f00; border-left:4px solid #f59f00; background:rgba(245,159,0,.08); border-radius:8px; padding:10px 14px; margin:0 0 14px;">

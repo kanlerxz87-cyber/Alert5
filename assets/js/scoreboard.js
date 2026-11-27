@@ -15,6 +15,7 @@
   var UI = global.UI;
   var Reviews = global.Reviews;
   var FeedLog = global.FeedLog;
+  var AlertSound = global.AlertSound;
 
   var LIVE_POLL_MS = 500;
   var IDLE_POLL_MS = 30000;
@@ -181,6 +182,11 @@
           if (review && signature !== prevSignature) {
             state.reviewByPk[key] = Object.assign({}, review, { signature: signature });
             changed = true;
+            /* Same alert sound as the Replay Feed, so a review called while the
+             * operator is watching the scoreboard is not missed. Muted by
+             * default and only audible when the alert sound is enabled on this
+             * browser (the preference is shared). */
+            if (global.AlertSound) AlertSound.play('review', { force: true });
           } else if (!review && state.reviewByPk[key]) {
             delete state.reviewByPk[key];
             changed = true;
@@ -508,6 +514,14 @@
   }
 
   function init() {
+    if (global.AlertSound) {
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (type) {
+        global.addEventListener(type, function once() {
+          AlertSound.prime();
+          global.removeEventListener(type, once);
+        }, { passive: true });
+      });
+    }
     state.date = urlDate() || parseDate();
     syncNav();
     FeedLog.onChange(function (payload) {

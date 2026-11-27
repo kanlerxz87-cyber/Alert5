@@ -496,13 +496,29 @@
     };
   }
 
-  /* Snapshot of every completed play's official classification, keyed by atBatIndex. */
+  /* Snapshot of every completed play's official classification, keyed by atBatIndex.
+   *
+   * `isComplete` is preferred, but some official play-by-play projections omit
+   * `about.isComplete` entirely on plays that are finished and carry an official
+   * result. Skipping those would blind the scorer-ruling detector, so a play
+   * counts as completed when it says so, or when it has a result event type and
+   * is not the at-bat currently in progress (the last play, with no result). */
+  function isCompletedPlay(play, index, total) {
+    var about = (play && play.about) || {};
+    if (about.isComplete === true) return true;
+    if (about.isComplete === false) return false;
+    var type = play && play.result && play.result.eventType;
+    if (!type) return false;
+    return index < total - 1;
+  }
+
   function snapshotPlays(plays, previous) {
     var map = Object.create(null);
-    (plays || []).forEach(function (play) {
-      var about = (play && play.about) || {};
-      if (about.isComplete !== true) return;
+    var list = plays || [];
+    list.forEach(function (play, i) {
+      if (!isCompletedPlay(play, i, list.length)) return;
       var c = classificationOf(play);
+      if (!isFinite(c.atBatIndex)) return;
       map[c.atBatIndex] = c;
     });
     return map;
@@ -684,6 +700,7 @@
     pendingRulings: pendingRulings,
     isPendingRuling: isPendingRuling,
     snapshotPlays: snapshotPlays,
+    isCompletedPlay: isCompletedPlay,
     diffSnapshots: diffSnapshots,
     classificationOf: classificationOf,
     managerCounters: managerCounters,
